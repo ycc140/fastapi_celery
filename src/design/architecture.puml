@@ -5,25 +5,27 @@ top to bottom direction
 
 agent "\nDocker\n" as Docker
 agent "\nRabbitMQ\n" as RabbitMQ
-agent "\n       <B>Prism\n(faked service)\n" as prism
+agent "\n       <B>Prism\n(mocked service)\n" as prism
 skinparam agentbackgroundColor LightCoral
 
 [Flower]
 [FastAPI]
-[uvicorn]
+[Uvicorn]
+[Gunicorn]
 [Celery\nworker] as Celery
 database "\nMongoDB\n" as DB #LightCoral
 
 
 Docker -[#blue]-> Flower
-Docker -[#blue]-> uvicorn
-Docker -[#blue]-> Celery
+Docker -[#blue]-> Gunicorn
+Gunicorn --> Uvicorn
 Celery <-> DB
+Docker -[#blue]-> Celery
 Celery .-> prism
 FastAPI .-> Flower
 Celery <-> RabbitMQ
 Flower <-> RabbitMQ
-uvicorn --> FastAPI
+Uvicorn --> FastAPI
 FastAPI <-> Celery
 
 @enduml
