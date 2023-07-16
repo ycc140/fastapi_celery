@@ -6,8 +6,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-15 13:52:10
-     $Rev: 21
+    $Date: 2023-07-17 00:27:46
+     $Rev: 26
 """
 
 # BUILTIN modules
@@ -23,6 +23,7 @@ from httpx import AsyncClient, ConnectTimeout, ConnectError
 # Local modules
 from .config.setup import config
 from .config import celery_config
+from .tools.rabbit_client import RabbitClient
 from .tools.custom_logging import create_unified_logger
 
 # Constants
@@ -44,7 +45,7 @@ logger = create_unified_logger()
 #
 async def _send_callback_response(task_id: str, url: str,
                                   status: str, payload: dict):
-    """ Send processing result to calling service.
+    """ Send processing result to calling service using a RESTful API URL call.
 
     :param task_id: Current task ID.
     :param url: External service callback URL.
@@ -70,6 +71,30 @@ async def _send_callback_response(task_id: str, url: str,
 
     except (ConnectError, ConnectTimeout):
         logger.error(f"No connection with URL callback: {url}")
+
+
+# ---------------------------------------------------------
+#
+async def _send_rabbit_response(task_id: str, queue: str,
+                                status: str, payload: dict):
+    """ Send processing result to calling service RabbitMQ queue.
+
+    :param task_id: Current task ID.
+    :param queue: External service response queue.
+    :param status: Processing status.
+    :param payload: processing result.
+    """
+
+    try:
+        result = {'job_id': task_id, 'status': status, 'result': payload}
+
+        client = RabbitClient(config.rabbit_url)
+        await client.send_message(result, queue)
+
+        logger.success(f"Sent RabbitMQ response to queue {queue}.")
+
+    except BaseException as why:
+        logger.error(f"No connection with RabbitMQ for queue {queue}: {why}")
 
 
 # ---------------------------------------------------------
@@ -121,6 +146,11 @@ def processor(task: callable, payload: dict) -> dict:
                                                 payload['callback'],
                                                 'SUCCESS', result))
 
+        if 'responseQueue' in payload:
+            asyncio.run(_send_rabbit_response(task.request.id,
+                                              payload['responseQueue'],
+                                              'SUCCESS', result))
+
         return result
 
     except BaseException as why:
@@ -131,12 +161,17 @@ def processor(task: callable, payload: dict) -> dict:
         # FAILURE and trigger final exception.
         if task.request.retries == task.max_retries:
             logger.error('Retry processing failed')
+            result = {'message': str(why)}
 
             if 'callback' in payload:
-                result = {'message': str(why)}
                 asyncio.run(_send_callback_response(task.request.id,
                                                     payload['callback'],
                                                     'FAILURE', result))
+
+            if 'responseQueue' in payload:
+                asyncio.run(_send_rabbit_response(task.request.id,
+                                                  payload['responseQueue'],
+                                                  'FAILURE', result))
 
             raise
 
