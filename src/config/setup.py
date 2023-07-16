@@ -6,8 +6,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-15 13:49:23
-     $Rev: 20
+    $Date: 2023-07-16 12:39:15
+     $Rev: 23
 """
 
 
@@ -31,8 +31,8 @@ SECRETS_DIR = ('/run/secrets'
                if Path('/.dockerenv').exists()
                else f'{site.USER_BASE}/secrets')
 """ This is where your secrets are stored (in Docker or locally). """
-BUILD_ENV = environ.get('BUILD_ENV')
-""" Current Docker platform environment. """
+ENVIRONMENT = environ.get('ENVIRONMENT', 'dev')
+""" Current platform environment. """
 
 
 # -----------------------------------------------------------------------------
@@ -122,14 +122,10 @@ class DockerProd(BaseModel):
 # Translation between Docker environment and their classes.
 _setup = {'local': DockerLocal, 'prod': DockerProd}
 
-# Detect current environment.
-_env = ('dev' if not Path('/.dockerenv').exists() else
-       'prod' if BUILD_ENV == 'prod' else 'local')
-
-if _env == 'dev':
+if ENVIRONMENT == 'dev':
     config = CommonConfig()
 
 else:
     _root_config = CommonConfig()
-    _docker_env = _setup[_env]().model_dump()
+    _docker_env = _setup[ENVIRONMENT]().model_dump()
     config = _root_config.model_copy(update=_docker_env)

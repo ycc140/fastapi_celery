@@ -2,23 +2,26 @@ version: "3.9"
 
 services:
 
-  service:
+  api:
     build:
       context: .
       args:
-        BUILD_ENV: local
+        BUILD_ENV: prod
     container_name: celery_service
     command: [gunicorn, -w=2, -k=uvicorn.workers.UvicornWorker, -b=:7000,
               --log-config=gunicorn.conf, --worker-tmp-dir=/dev/shm, src.main:app]
     restart: always
-    volumes:
-      - ./src/:/home/app/src/
     ports:
       - "8200:7000"
     secrets:
       - mongo_url
       - rabbit_url
       - service_pwd
+    depends_on:
+      - dashboard
+      - worker
+    environment:
+      - ENVIRONMENT=prod
     networks:
       - service_net
 
@@ -26,26 +29,31 @@ services:
     build:
       context: .
       args:
-        BUILD_ENV: local
+        BUILD_ENV: prod
     container_name: celery_worker
-    command: [celery, --app=src.tasks, worker, --loglevel=info]
+    command: [celery, --app=src.tasks, worker, --loglevel=info, --task-events]
     restart: always
     secrets:
       - mongo_url
       - rabbit_url
       - service_pwd
+    environment:
+      - ENVIRONMENT=prod
     networks:
       - service_net
 
   dashboard:
-    image: mher/flower:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.flower
     container_name: celery_dashboard
-    command: [celery, --broker=amqp://guest:guest@rabbitmq/%2F, flower]
+    command: [celery, --broker=amqp://guest:guest@rabbitmq/%2F,
+              flower, --broker-api=http://guest:guest@rabbitmq:15672/api/]
     restart: always
     ports:
       - "5555:5555"
-    depends_on:
-      - worker
+    environment:
+      - FLOWER_UNAUTHENTICATED_API=true
     networks:
       - service_net
 

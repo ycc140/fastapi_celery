@@ -6,106 +6,142 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-15 13:49:23
-     $Rev: 20
+    $Date: 2023-07-16 12:39:15
+     $Rev: 23
 """
 
 # BUILTIN modules
+import os
 import json
 from os import environ
 from pathlib import Path
 from configparser import ConfigParser
 
-# Local modules
-from setup import config
-
 # Constants.
 CWD = Path(__file__).parent
 """ Defines the current working directory. """
-ADJUSTED_LEVELS = {'TRACE': 'DEBUG', 'SUCCESS': 'INFO'}
-""" Adjusted log levels for gunicorn. """
 BUILD = environ.get('BUILD_ENV')
 """ Current platform environment. """
+ADJUSTED_LEVELS = {'TRACE': 'DEBUG', 'SUCCESS': 'INFO'}
+""" Adjusted log levels for gunicorn. """
 
 
-# ---------------------------------------------------------
+# -----------------------------------------------------------------------------
 #
-def _create_uvicorn_file():
-    """ Create an uvicorn.json log configuration file.
+class DockerApiConfigManager:
+    """
+    This class handles the creating of uvicorn and gunicorn log config files
+    based on the environment and the content of the .env file.
 
-    Create a new uvicorn log config file based upon the uvicorn template
-    file, updated with the log level from the global log config file for
-    all available loggers.
+    When the Docker build environment is LOCAL a uvicorn.json is created
+    from the config/uvicorn.template file updated with the log level from
+    the global log config file.
+
+    When the Docker build environment is PROD a gunicorn.conf is created
+    from the config/gunicorn.template file updated with the log level
+    from the global log config file.
+
+
+    @ivar config: Configuration parameters.
     """
 
-    level = config.log_level.upper()
+    # ---------------------------------------------------------
+    #
+    def __init__(self, conf: callable):
+        """ Class initializer.
 
-    # Get uvicorn log template reference.
-    with open(f"{CWD}/uvicorn.template") as hdl:
-        template = json.load(hdl)
+        :param conf: Configuration parameters.
+        """
 
-    # Set current log level from global log configuration.
-    for item in ('uvicorn.error', 'uvicorn.access'):
+        self.config = conf
 
-        # Make sure any loggers exist before trying an update.
-        if 'loggers' in template and item in template['loggers']:
-            template['loggers'][item]['level'] = level
+    # ---------------------------------------------------------
+    #
+    def _create_uvicorn_file(self):
+        """ Create an uvicorn.json log configuration file.
 
-    # Store updated uvicorn log configuration.
-    with open(f'{CWD.parent.parent}/uvicorn.json', 'w') as hdl:
-        json.dump(template, hdl, indent=4)
+        Create a new uvicorn log config file based upon the uvicorn template
+        file, updated with the log level from the global log config file for
+        all available loggers.
+        """
 
+        level = self.config.log_level.upper()
 
-# ---------------------------------------------------------
-#
-def _create_gunicorn_file():
-    """ Create a gunicorn.conf log configuration file.
+        # Get uvicorn log template reference.
+        with open(f"{CWD}/uvicorn.template") as hdl:
+            template = json.load(hdl)
 
-    Create a new gunicorn log config file based upon the gunicorn template
-    file, updated with the log level from the global log config file for
-    all available loggers.
-    """
+        # Set current log level from global log configuration.
+        for item in ('uvicorn.error', 'uvicorn.access'):
 
-    ini_config = ConfigParser()
-    level = config.log_level.upper()
+            # Make sure any loggers exist before trying an update.
+            if 'loggers' in template and item in template['loggers']:
+                template['loggers'][item]['level'] = level
 
-    # Get gunicorn log template reference.
-    ini_config.read(f"{CWD}/gunicorn.template")
-
-    # Set current log level from global log configuration.
-    for section in ('logger_root', 'logger_gunicorn.error', 'logger_gunicorn.access'):
-
-        # gunicorn only accepts default python log levels, so we
-        # need to handle the extra log levels that Loguru have defined.
-        if section in ini_config:
-            ini_config.set(section, 'level', ADJUSTED_LEVELS.get(level, level))
-
-    # Store updated gunicorn log configuration.
-    with open(f'{CWD.parent.parent}/gunicorn.conf', 'w') as hdl:
-        ini_config.write(hdl)
+        # Store updated uvicorn log configuration.
+        with open(f'{CWD.parent.parent}/uvicorn.json', 'w') as hdl:
+            json.dump(template, hdl, indent=4)
 
 
-# ---------------------------------------------------------
-#
-def create_config_files():
-    """ Create uvicorn and gunicorn log configuration files.
+    # ---------------------------------------------------------
+    #
+    def _create_gunicorn_file(self):
+        """ Create a gunicorn.conf log configuration file.
 
-    Create a new uvicorn log config file based upon the uvicorn template
-    file, updated with the log level from the global log config file.
+        Create a new gunicorn log config file based upon the gunicorn template
+        file, updated with the log level from the global log config file for
+        all available loggers.
+        """
 
-    Create a new gunicorn log config file based upon the gunicorn template
-    file, updated with the log level from the global log config file.
-    """
+        ini_config = ConfigParser()
+        level = self.config.log_level.upper()
 
-    if BUILD == 'prod':
-        _create_gunicorn_file()
+        # Get gunicorn log template reference.
+        ini_config.read(f"{CWD}/gunicorn.template")
 
-    else:
-        _create_uvicorn_file()
+        # Set current log level from global log configuration.
+        for section in ('logger_root',
+                        'logger_gunicorn.error',
+                        'logger_gunicorn.access'):
+
+            # gunicorn only accepts default python log levels, so we
+            # need to handle the extra log levels that Loguru have defined.
+            if section in ini_config:
+                ini_config.set(section, 'level',
+                               ADJUSTED_LEVELS.get(level, level))
+
+        # Store updated gunicorn log configuration.
+        with open(f'{CWD.parent.parent}/gunicorn.conf', 'w') as hdl:
+            ini_config.write(hdl)
+
+
+    # ---------------------------------------------------------
+    #
+    def create_config_files(self):
+        """ Create uvicorn and gunicorn log configuration files.
+
+        Create a new uvicorn log config file based upon the uvicorn template
+        file updated with the log level from the global log config file.
+
+        Create a new gunicorn log config file based upon the gunicorn template
+        file updated with the log level from the global log config file.
+        """
+
+        if BUILD == 'prod':
+            self._create_gunicorn_file()
+
+        else:
+            self._create_uvicorn_file()
 
 
 # ---------------------------------------------------------
 
 if __name__ == '__main__':
 
-    create_config_files()
+    # For config to work here we have to set the
+    # environment BEFORE we import the config module.
+    os.environ['ENVIRONMENT'] = BUILD
+
+    from setup import config
+
+    DockerApiConfigManager(config).create_config_files()

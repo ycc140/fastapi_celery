@@ -6,8 +6,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-15 12:48:23
-     $Rev: 19
+    $Date: 2023-07-16 12:39:15
+     $Rev: 23
 """
 
 # Third party modules
@@ -59,5 +59,6 @@ def test_prod_config(test_app: TestClient):
     _docker_env = DockerProd().model_dump()
     conf= _root_config.model_copy(update=_docker_env)
 
+    assert conf.log_level == 'info'
     assert conf.log_diagnose == False
     assert conf.flower_host == 'dashboard'

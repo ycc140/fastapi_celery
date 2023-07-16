@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
 
-  service:
+  api:
     build:
       context: .
       args:
@@ -19,7 +19,10 @@ services:
       - rabbit_url
       - service_pwd
     depends_on:
+      - dashboard
       - worker
+    environment:
+      - ENVIRONMENT=local
     networks:
       - service_net
 
@@ -34,8 +37,8 @@ services:
       - mongo_url
       - rabbit_url
       - service_pwd
-    depends_on:
-      - dashboard
+    environment:
+      - ENVIRONMENT=local
     networks:
       - service_net
 
