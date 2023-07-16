@@ -1,0 +1,29 @@
+@startuml
+
+' left to right direction
+top to bottom direction
+
+agent "\nDocker\n" as Docker
+agent "\nRabbitMQ\n" as RabbitMQ
+agent "\n       <B>Prism\n(faked service)\n" as prism
+skinparam agentbackgroundColor LightCoral
+
+[Flower]
+[FastAPI]
+[uvicorn]
+[Celery\nworker] as Celery
+database "\nMongoDB\n" as DB #LightCoral
+
+
+Docker -[#blue]-> Flower
+Docker -[#blue]-> uvicorn
+Docker -[#blue]-> Celery
+Celery <-> DB
+Celery .-> prism
+FastAPI .-> Flower
+Celery <-> RabbitMQ
+Flower <-> RabbitMQ
+uvicorn --> FastAPI
+FastAPI <-> Celery
+
+@enduml

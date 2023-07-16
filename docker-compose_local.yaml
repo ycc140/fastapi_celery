@@ -1,0 +1,67 @@
+version: "3.9"
+
+services:
+
+  service:
+    build:
+      context: .
+      args:
+        BUILD_ENV: local
+    container_name: celery_service
+    command: [uvicorn, --reload, --host=0.0.0.0, --port=7000,
+              --log-config=uvicorn.json, src.main:app]
+    volumes:
+      - ./src/:/home/app/src/
+    ports:
+      - "8200:7000"
+    secrets:
+      - mongo_url
+      - rabbit_url
+      - service_pwd
+    depends_on:
+      - worker
+    networks:
+      - service_net
+
+  worker:
+    build:
+      context: .
+      args:
+        BUILD_ENV: local
+    container_name: celery_worker
+    command: [celery, --app=src.tasks, worker, --loglevel=info, --task-events]
+    secrets:
+      - mongo_url
+      - rabbit_url
+      - service_pwd
+    depends_on:
+      - dashboard
+    networks:
+      - service_net
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.flower
+    container_name: celery_dashboard
+    command: [celery, --broker=amqp://guest:guest@rabbitmq/%2F,
+              flower, --broker-api=http://guest:guest@rabbitmq:15672/api/]
+    ports:
+      - "5555:5555"
+    environment:
+      - FLOWER_UNAUTHENTICATED_API=true
+    networks:
+      - service_net
+
+secrets:
+    service_pwd:
+      file: C:/Users/ander/AppData/Roaming/Python/secrets/service_pwd
+    mongo_url:
+      file: C:/Users/ander/AppData/Roaming/Python/secrets/mongo_local_url
+    rabbit_url:
+      file: C:/Users/ander/AppData/Roaming/Python/secrets/rabbit_local_url
+
+networks:
+  service_net:
+    external: true
+    name: custom_network

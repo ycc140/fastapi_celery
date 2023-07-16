@@ -1,0 +1,51 @@
+#------------------------------------------------------------------------------
+# Copyright: Wilde Consulting
+#   License: Apache 2.0
+#
+# DESCRIPTION:
+#		Gunicorn log configuration file.
+#
+# VERSION INFO:
+#      $Repo: fastapi_mongo
+#    $Author: Anders Wiklund
+#      $Date: 2023-02-23 21:12:28
+#       $Rev: 34
+#------------------------------------------------------------------------------
+
+[loggers]
+keys=root, gunicorn.error, gunicorn.access
+
+[handlers]
+keys=access, gunicorn
+
+[formatters]
+keys=gunicorn
+
+[logger_root]
+handlers=gunicorn
+propagate=1
+
+[logger_gunicorn.error]
+qualname=gunicorn.error
+handlers=gunicorn
+propagate=0
+
+[logger_gunicorn.access]
+qualname=gunicorn.access
+handlers=access
+propagate=0
+
+[handler_gunicorn]
+class=StreamHandler
+formatter=gunicorn
+args=(sys.stderr, )
+
+[handler_access]
+class=StreamHandler
+formatter=gunicorn
+args=(sys.stdout, )
+
+[formatter_gunicorn]
+datefmt=%Y-%m-%d %H:%M:%S
+format=%(asctime)s.%(msecs)03.0f | %(levelname)-8s | [%(process)02d] %(message)s
+class=logging.Formatter

@@ -1,0 +1,99 @@
+openapi: 3.0.3
+
+info:
+  title: CallerService API
+  description: API example that shows how to handle a call request callback response.
+  version: 1.0.0
+
+servers:
+  - url: http://127.0.0.1:8001
+    description: URL for local development and testing
+  - url: https://fictitious.com
+    description: main production server
+
+paths:
+  /v1/response:
+    post:
+      summary: The call request callback entrypoint
+      tags:
+        - response
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CallerPayload'
+      responses:
+        '202':
+          description: A JSON representation of the callback response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallerResponse'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+components:
+  responses:
+    UnprocessableEntity:
+      description: The payload contains invalid values.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: The specified resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+
+    ResultSchema:
+      type: object
+      additionalProperties: false
+      description: 'Representation of a callback response payload.'
+      properties:
+        message:
+          description: Returned callback message.
+          example: Lots of work was done here
+          type: string
+
+    CallerPayload:
+      type: object
+      additionalProperties: false
+      description: 'Representation of a callback response message.'
+      required:
+        - job_id
+        - status
+        - result
+      properties:
+        job_id:
+          description: Job ID of the returned callback request.
+          example: b76d019f-5937-4a14-8091-1d9f18666c93
+          type: string
+        status:
+          description: Processed job status.
+          type: string
+          enum:
+            - SUCCESS
+            - FAILURE
+        result:
+            $ref: '#/components/schemas/ResultSchema'
+
+    CallerResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+      properties:
+        status:
+          description: POST response status.
+          example: OK
+          type: string
