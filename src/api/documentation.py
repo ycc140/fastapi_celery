@@ -6,8 +6,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-15 13:49:23
-     $Rev: 20
+    $Date: 2023-07-16 19:17:08
+     $Rev: 24
 """
 
 # Local modules
@@ -87,12 +87,19 @@ and callbacks to keep a responsive API regardless of processing time.**
 **MongoDB**
     *MongoDB is an open source NoSQL database management program that can manage document-oriented information.*
 
-**uvicorn**
+**Uvicorn**
     *Uvicorn is an ASGI web server implementation for Python.*
 
+**Gunicorn**
+    *Gunicorn 'Green Unicorn' is a Python WSGI HTTP Server for UNIX. It is used in front of Uvicorn to make 
+    sure the defined number of workers are always running.*
+    
 **FastAPI**
     *FastAPI is a modern, fast (high-performance), web framework for building APIs with Python 3.7+
     based on standard Python type hints.*
+
+**Prism**
+    *Prism is an open-source HTTP mock and proxy server.*
     
 <br>**The following HTTP status codes are returned:**
   * `200:` Successful GET response.
