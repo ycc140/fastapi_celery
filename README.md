@@ -1,9 +1,8 @@
 # fastapi-celery example
-An extensive python FastAPI example using MongoDB
+An extensive python FastAPI example using Celery
+<img width="35%" align="right" src="src/design/architecture.png" alt=""/>
 
 ## Author: Anders Wiklund
-
-<img width="45%" align="right" src="src/design/architecture.png" alt=""/>
 
 This code repository is an extensive FAstAPI example of a RESTful API using Celery. 
 
