@@ -6,45 +6,68 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-17 00:27:46
-     $Rev: 26
+    $Date: 2023-07-18 01:40:52
+     $Rev: 31
 """
 
 # BUILTIN modules
+import json
 import asyncio
-from typing import Callable, Optional
+from typing import Callable
 
 # Third party modules
-import ujson as json
 from aio_pika import connect, connect_robust, Message, DeliveryMode
 from aio_pika.abc import AbstractIncomingMessage, AbstractRobustConnection
+
+# Local modules
+from ..config.setup import config
+
+
+# ---------------------------------------------------------
+#
+async def publish_rabbit_message(message: dict, queue: str):
+    """ Publish message on specified RabbitMQ queue asynchronously.
+
+    :param message: Message to be sent.
+    :param queue: Message queue to use for message sending.
+    """
+    connection = await connect(config.rabbit_url)
+    channel = await connection.channel()
+
+    # Create message and publish it.
+    message_body = Message(
+        content_type='application/json',
+        delivery_mode=DeliveryMode.PERSISTENT,
+        body=json.dumps(message, ensure_ascii=False).encode())
+    await channel.default_exchange.publish(
+        routing_key=queue, message=message_body)
+
+    # Close the connection properly.
+    await connection.close()
 
 
 # -----------------------------------------------------------------------------
 #
-class RabbitClient:
-    """ This class handles the communication with the RabbitMQ server.
+class RabbitConsumer:
+    """ This class handles asynchronous RabbitMQ queue subscriptions.
 
     Note: the queue mechanism is implemented to take advantage of good
     horizontal message scaling when needed.
-
-    Both Publisher and Consumer async handling is implemented.
     """
-    rabbit_url: str = None
+
+    rabbit_url = config.rabbit_url
 
     # ---------------------------------------------------------
     #
-    def __init__(self, rabbit_url: str, service: Optional[str] = None,
-                 incoming_message_handler: Optional[Callable] = None):
+    def __init__(self, service: str = None,
+                 incoming_message_handler: Callable = None):
         """ The class initializer.
 
-        :param rabbit_url: RabbitMQ's connection string.
-        :param service: Name of receiving service (when using consume).
+        :param service: Name of receiving service.
         :param incoming_message_handler: Incoming message callback method.
         """
 
         # Unique parameters.
-        self.rabbit_url = rabbit_url
         self.service_name = service
         self.message_handler = incoming_message_handler
 
@@ -82,22 +105,3 @@ class RabbitClient:
         await queue.consume(self._process_incoming_message, no_ack=False)
 
         return connection
-
-    # ---------------------------------------------------------
-    #
-    @classmethod
-    async def send_message(cls, message: dict, queue: str):
-        """ Send message to RabbitMQ Publisher queue.
-
-        :param message: Message to be sent.
-        :param queue: Message queue to use for message sending.
-        """
-        connection = await connect(url=cls.rabbit_url)
-        channel = await connection.channel()
-
-        message_body = Message(
-            content_type='application/json',
-            body=json.dumps(message, ensure_ascii=False).encode(),
-            delivery_mode=DeliveryMode.PERSISTENT)
-        await channel.default_exchange.publish(
-            routing_key=queue, message=message_body)

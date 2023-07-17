@@ -7,8 +7,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-17 00:51:13
-     $Rev: 28
+    $Date: 2023-07-18 01:40:52
+     $Rev: 31
 """
 
 # BUILTIN modules
@@ -16,8 +16,7 @@ import asyncio
 import contextlib
 
 # Local modules
-from src.config.setup import config
-from src.tools.rabbit_client import RabbitClient
+from src.tools.rabbit_client import RabbitConsumer
 
 # Constants
 SERVICE = 'CallerService'
@@ -38,7 +37,7 @@ async def process_incoming_message(message: dict):
 async def receiver():
     """ Start a asyncio task to consume messages. """
     print(f'Started RabbitMQ message queue subscription on {SERVICE}...')
-    client = RabbitClient(config.rabbit_url, SERVICE, process_incoming_message)
+    client = RabbitConsumer(SERVICE, process_incoming_message)
     connection = await asyncio.create_task(client.consume())
 
     try:

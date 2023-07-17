@@ -6,8 +6,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-16 19:17:08
-     $Rev: 24
+    $Date: 2023-07-16 19:29:13
+     $Rev: 25
 """
 
 # Local modules
@@ -63,7 +63,7 @@ license_info = {
 }
 
 description = """
-<img width="30%" align="right" src="/static/architecture.png"/>
+<img width="25%" align="right" src="/static/architecture.png"/>
 **This is a Microservice template that illustrates how to use Celery tasks
 and callbacks to keep a responsive API regardless of processing time.**
 

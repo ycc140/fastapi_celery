@@ -6,14 +6,17 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-17 00:27:46
-     $Rev: 26
+    $Date: 2023-07-18 01:40:52
+     $Rev: 31
 """
 
 # BUILTIN modules
+import json
 import time
 import random
 import asyncio
+from typing import Any
+from traceback import format_exception
 
 # Third party modules
 from celery import Celery
@@ -23,7 +26,7 @@ from httpx import AsyncClient, ConnectTimeout, ConnectError
 # Local modules
 from .config.setup import config
 from .config import celery_config
-from .tools.rabbit_client import RabbitClient
+from .tools.rabbit_client import publish_rabbit_message
 from .tools.custom_logging import create_unified_logger
 
 # Constants
@@ -43,70 +46,113 @@ logger = create_unified_logger()
 
 # ---------------------------------------------------------
 #
-async def _send_callback_response(task_id: str, url: str,
-                                  status: str, payload: dict):
-    """ Send processing result to calling service using a RESTful API URL call.
+async def send_restful_response(url: str, result: dict):
+    """ Send processing result to calling service using a RESTful URL call.
 
-    :param task_id: Current task ID.
     :param url: External service callback URL.
-    :param status: Processing status.
-    :param payload: processing result.
+    :param result: processing result.
     """
 
     try:
-        result = {'job_id': task_id, 'status': status, 'result': payload}
-
         async with AsyncClient() as client:
             resp = await client.post(url=url, json=result,
                                      auth=(config.service_user, config.service_pwd),
                                      timeout=config.url_timeout, headers=config.hdr_data)
 
         if resp.status_code == 202:
-            logger.success(f"Sent POST callback to URL {url} - "
+            logger.success(f"Sent POST response to URL {url} - "
                            f"[{resp.status_code}: {resp.json()}].")
 
         else:
-            logger.error(f"Failed POST callback to URL {url} - "
+            logger.error(f"Failed POST response to URL {url} - "
                          f"[{resp.status_code}: {resp.json()}].")
 
     except (ConnectError, ConnectTimeout):
-        logger.error(f"No connection with URL callback: {url}")
+        logger.error(f"No connection with response URL: {url}")
 
 
 # ---------------------------------------------------------
 #
-async def _send_rabbit_response(task_id: str, queue: str,
-                                status: str, payload: dict):
-    """ Send processing result to calling service RabbitMQ queue.
+async def send_rabbit_response(queue_name: str, result: dict):
+    """ Send processing result to calling service using a RabbitMQ queue.
 
-    :param task_id: Current task ID.
-    :param queue: External service response queue.
-    :param status: Processing status.
-    :param payload: processing result.
+    :param queue_name: External service response queue name.
+    :param result: processing result.
     """
 
     try:
-        result = {'job_id': task_id, 'status': status, 'result': payload}
-
-        client = RabbitClient(config.rabbit_url)
-        await client.send_message(result, queue)
-
-        logger.success(f"Sent RabbitMQ response to queue {queue}.")
+        await publish_rabbit_message(result, queue_name)
+        logger.success(f"Sent response to RabbitMQ queue {queue_name}.")
 
     except BaseException as why:
-        logger.error(f"No connection with RabbitMQ for queue {queue}: {why}")
+        logger.error(f"No connection with RabbitMQ queue {queue_name}: {why}")
 
 
 # ---------------------------------------------------------
 #
-def _do_the_work(payload: dict) -> dict:
-    """ Do the real work here.
+def response_handler(task: callable, status: str, retval: Any,
+                     task_id: str, args: list, _, __):
+    """
+    Return the processing response, good or bad when the task is finished
+    when the caller has requested it.
 
-    :param payload: processing result.
-    :return: Processing result.
+    When the 'responseUrl' parameter is one of the input arguments the
+    processing result is returned to the caller by using a RESTful
+    POST call to the specified callback URL.
+
+    When the 'responseQueue' parameter is one of the input arguments
+    the processing result is returned to the caller by publishing it
+    on the specified RabbitMQ queue.
+
+    :param task: Current task.
+    :param status: Current task state.
+    :param retval: Task return value/exception.
+    :param task_id: Unique id of the task.
+    :param args: Original arguments for the task.
+    :param _: Not used (needed for correct signature).
+    :param __: Not used (needed for correct signature).
+    """
+    payload = args[0]
+
+    # Check if any more work needs to be done here.
+    if not payload.get('responseUrl', payload.get('responseQueue')):
+        return
+
+    if status == 'SUCCESS':
+        result = retval
+
+    else:
+        logger.error(f"Task '{task.name}' retry processing failed")
+        result = {'message': format_exception(retval)}
+
+    response = {'job_id': task_id, 'status': status, 'result': result}
+
+    if 'responseUrl' in payload:
+        asyncio.run(send_restful_response(payload['responseUrl'], response))
+
+    if 'responseQueue' in payload:
+        asyncio.run(send_rabbit_response(payload['responseQueue'], response))
+
+
+# ---------------------------------------------------------
+#
+@WORKER.task(name='tasks.processor',
+             after_return=response_handler,
+             autoretry_for=(BaseException,),
+             bind=True, default_retry_delay=10, max_retries=2)
+def processor(task: callable, payload: dict) -> dict:
+    """ Let's simulate a long-running task here.
+
+    Using the random module to generate errors now and
+    then to be able to test the retry functionality.
+
+    :param task: Current task.
+    :param payload: Process received message.
+    :return: Processing response.
     """
 
-    logger.debug(f'Processing received payload: {payload}')
+    logger.trace(f'config: {json.dumps(config.model_dump(), indent=2)}')
+    logger.debug(f"Task '{task.name}' is processing received payload: {payload}")
 
     # Mimic random error for testing purposes.
     if not random.choice([0, 1]):
@@ -117,62 +163,3 @@ def _do_the_work(payload: dict) -> dict:
 
     # Return the processing result of the lengthy task.
     return {'message': 'Lots of work was done here'}
-
-
-# ---------------------------------------------------------
-#
-@WORKER.task(name='processor', bind=True,
-             default_retry_delay=10, max_retries=2)
-def processor(task: callable, payload: dict) -> dict:
-    """ Let's simulate a long-running task here.
-
-    Using the random module to generate errors now and
-    then to be able to test the retry functionality.
-
-    A caller callback URL is used when the callback parameter is part
-    of the payload. This means that the callback is called with the
-    processing result, good or bad.
-
-    :param task: Current task (Used for retries).
-    :param payload: Process received message.
-    :return: Processing response.
-    """
-
-    try:
-        result = _do_the_work(payload)
-
-        if 'callback' in payload:
-            asyncio.run(_send_callback_response(task.request.id,
-                                                payload['callback'],
-                                                'SUCCESS', result))
-
-        if 'responseQueue' in payload:
-            asyncio.run(_send_rabbit_response(task.request.id,
-                                              payload['responseQueue'],
-                                              'SUCCESS', result))
-
-        return result
-
-    except BaseException as why:
-        logger.warning('exception raised, processing is '
-                       'retried (max 2 times) after 10 seconds')
-
-        # All the retries have failed, so report
-        # FAILURE and trigger final exception.
-        if task.request.retries == task.max_retries:
-            logger.error('Retry processing failed')
-            result = {'message': str(why)}
-
-            if 'callback' in payload:
-                asyncio.run(_send_callback_response(task.request.id,
-                                                    payload['callback'],
-                                                    'FAILURE', result))
-
-            if 'responseQueue' in payload:
-                asyncio.run(_send_rabbit_response(task.request.id,
-                                                  payload['responseQueue'],
-                                                  'FAILURE', result))
-
-            raise
-
-        processor.retry(exc=why)
