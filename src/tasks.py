@@ -6,8 +6,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-18 01:40:52
-     $Rev: 31
+    $Date: 2023-07-18 09:44:19
+     $Rev: 32
 """
 
 # BUILTIN modules
@@ -26,7 +26,7 @@ from httpx import AsyncClient, ConnectTimeout, ConnectError
 # Local modules
 from .config.setup import config
 from .config import celery_config
-from .tools.rabbit_client import publish_rabbit_message
+from .tools.rabbit_client import RabbitClient
 from .tools.custom_logging import create_unified_logger
 
 # Constants
@@ -81,7 +81,8 @@ async def send_rabbit_response(queue_name: str, result: dict):
     """
 
     try:
-        await publish_rabbit_message(result, queue_name)
+        client = RabbitClient(config.rabbit_url)
+        await client.publish_message(queue_name, result)
         logger.success(f"Sent response to RabbitMQ queue {queue_name}.")
 
     except BaseException as why:
