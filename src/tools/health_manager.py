@@ -6,8 +6,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-15 13:49:23
-     $Rev: 20
+    $Date: 2023-07-18 20:36:15
+     $Rev: 36
 """
 
 # BUILTIN modules
@@ -15,42 +15,71 @@ from typing import List
 
 # Third party modules
 from loguru import logger
-from httpx import AsyncClient, ConnectTimeout
-
 
 # local modules
+from ..tasks import WORKER
 from ..config.setup import config
 from ..api.models import ResourceModel, HealthResponseModel
 
 
 # ---------------------------------------------------------
 #
-async def _get_celery_status() -> List[ResourceModel]:
+async def _get_celery_worker_status() -> List[ResourceModel]:
     """ Return Celery worker(s) connection status.
 
     :return: Celery worker(s) connection status.
     """
 
     result = []
-    host = config.flower_host
 
     try:
-        async with AsyncClient() as client:
-            url = f"http://{host}:5555/api/workers?status=true"
-            resp = await client.get(timeout=config.url_timeout,
-                                    url=url, headers=config.hdr_data)
+        if items := WORKER.control.ping(timeout=0.1):
 
-        if resp.status_code != 200:
-            errmsg = f"Failed GET request for URL {url} - " \
-                     f"[{resp.status_code}: {resp.json()['detail']}]."
-            raise RuntimeError(errmsg)
+            for worker in [key for elem in items for key in elem.keys()]:
+                result += [ResourceModel(name=f'Celery.worker ({worker})', status=True)]
 
-        for worker, status in resp.json().items():
-            result += [ResourceModel(name=worker, status=status)]
+        else:
+            logger.error('No active workers found.')
+            result +=  [ResourceModel(name='Celery.worker', status=False)]
 
-    except ConnectTimeout as why:
+    except BaseException as why:
         logger.error(f'WORKER: {why}')
-        result += [ResourceModel(name='Celery', status=False)]
+        result += [ResourceModel(name='Celery.worker', status=False)]
+
+    return result
+
+
+# ---------------------------------------------------------
+#
+async def _get_celery_main_status() -> list:
+    """ Return Celery RabbitMQ broker and MongoDB backend connection status.
+
+    :return: Celery broker and backend connection status.
+    """
+
+    result = []
+
+    try:
+        with WORKER.connection_for_write() as conn:
+            conn.connect()
+            conn.release()
+            broker_state = True
+
+    except BaseException as why:
+        logger.error(f'BROKER: {why}')
+        broker_state = False
+
+    result += [ResourceModel(name='Celery.broker (RabbitMq)', status=broker_state)]
+
+    try:
+        WORKER.backend._get_connection().server_info()
+        backend_state = True
+
+    except BaseException as why:
+        logger.error(f'BACKEND: {why}')
+        backend_state = False
+
+    result += [ResourceModel(name='Celery.backend (MongoDb)', status=backend_state)]
 
     return result
 
@@ -63,7 +92,8 @@ async def get_health_status() -> HealthResponseModel:
     :return: Service health status.
     """
     resource_items = []
-    resource_items += await _get_celery_status()
+    resource_items += await _get_celery_main_status()
+    resource_items += await _get_celery_worker_status()
     total_status = (all(key.status for key in resource_items)
                     if resource_items else False)
 
