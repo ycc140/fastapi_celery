@@ -1,20 +1,20 @@
 # fastapi-celery example
-An extensive python FastAPI example using Celery
+An elaborate python FastAPI example using Celery
 <img width="35%" align="right" src="src/design/architecture.png" alt=""/>
 
 ## Author: Anders Wiklund
 
-This code repository is an extensive FAstAPI example of a RESTful API using Celery. 
+This code repository is an elaborate FAstAPI example of a RESTful API using Celery. There's also a response functionality where the callar can receive responses without have to poll for the answer. The caller can chose between  a http RESTful callback or a RabbitMQ queue message.
 
 Async IO is a vital part of FastAPI, and it will be used where possible in this example.
 
-This repository is described in a number of **Medium** articles.
+This repository is described in a couple of **Medium** articles.
 
 ### Here's a brief outline of the article parts
 
 #### [1. Introduction and installation of required components](https://medium.com/@wilde.consult/fastapi-celery-flower-docker-async-example-part1-8e1c6b631d51)
 This part talks briefly about what Celery is and when to use it. It covers the overall 
-architecture of the example and the  installation of required components.
+architecture of the example and the installation of required components.
 
 #### [2. A code walkthrough of configuration and tools components](https://medium.com/@wilde.consult/fastapi-celery-flower-docker-async-example-part2-3ef830974d7)
 This part is a walkthrough of the code in the configuration and tools directories.
