@@ -6,8 +6,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-16 19:29:13
-     $Rev: 25
+    $Date: 2023-07-18 20:48:58
+     $Rev: 37
 """
 
 # Local modules
@@ -17,14 +17,22 @@ from ..config.setup import config
 resource_example = {
   "name": "ProcessingService",
   "status": True,
-  "version": "0.9.1",
+  "version": "1.4.2",
   "resources": [
     {
-      "name": "celery@CHARON",
+      "name": "Celery.broker (RabbitMq)",
       "status": True
     },
     {
-      "name": "celery@90dc473e51fc",
+      "name": "Celery.backend (MongoDb)",
+      "status": True
+    },
+    {
+      "name": "Celery.worker (celery@e7dc920209c7)",
+      "status": True
+    },
+    {
+      "name": "Celery.worker (celery@CHARON)",
       "status": True
     }
   ]
