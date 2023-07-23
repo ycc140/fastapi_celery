@@ -6,8 +6,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-16 12:39:15
-     $Rev: 23
+    $Date: 2023-07-23 19:52:14
+     $Rev: 38
 """
 
 # Third party modules
@@ -30,6 +30,7 @@ def test_dev_config(test_app: TestClient):
     assert conf.flower_host == 'localhost'
     assert isinstance(conf.hdr_data, dict)
     assert isinstance(conf.url_timeout, tuple)
+    assert conf.hdr_data['X-API-Key'] == conf.service_pwd
 
 
 # ---------------------------------------------------------
@@ -42,7 +43,7 @@ def test_local_config(test_app: TestClient):
 
     _root_config = CommonConfig()
     _docker_env = DockerLocal().model_dump()
-    conf= _root_config.model_copy(update=_docker_env)
+    conf = _root_config.model_copy(update=_docker_env)
 
     assert conf.flower_host == 'dashboard'
 
