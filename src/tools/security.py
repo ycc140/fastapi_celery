@@ -6,41 +6,34 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-08 19:36:02
-     $Rev: 1
+    $Date: 2023-07-23 19:52:14
+     $Rev: 38
 """
 
-# BUILTIN modules
-import secrets
-
 # Third party modules
-from starlette.status import HTTP_401_UNAUTHORIZED
-
-from fastapi import Depends, HTTPException
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi.security import APIKeyHeader
+from fastapi import HTTPException, Security, status
 
 # local modules
 from ..config.setup import config
 
 # Constants
-SECURITY = HTTPBasic()
-""" HTTP basic instance. """
+API_KEY_HEADER = APIKeyHeader(name="X-API-Key")
+""" Using API key authentication. """
 
 
 # ---------------------------------------------------------
 #
-def validate_authentication(credentials: HTTPBasicCredentials = Depends(SECURITY)):
-    """ Validate authentication.
+def validate_authentication(api_key: str = Security(API_KEY_HEADER)):
+    """ Validate API key authentication.
 
-    :param credentials: Authentication credentials.
-    :raise HTTPException: 401 => When incorrect username or password is supplied.
+    :param api_key: Authentication credentials.
+    :raise HTTPException(401): When incorrect API key is supplied.
     """
 
-    correct_password = secrets.compare_digest(credentials.password, config.service_pwd)
-    correct_username = secrets.compare_digest(credentials.username, config.service_user)
-
-    if not (correct_username and correct_password):
+    if api_key != config.service_pwd:
         raise HTTPException(
-            status_code=HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Basic"})
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or missing API Key",
+            headers={"WWW-Authenticate": "X-API-Key"}
+        )
