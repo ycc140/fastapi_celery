@@ -6,10 +6,9 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-16 12:39:15
-     $Rev: 23
+    $Date: 2023-07-23 19:52:14
+     $Rev: 38
 """
-
 
 # BUILTIN modules
 import site
@@ -18,7 +17,7 @@ from pathlib import Path
 from typing import Type, Tuple
 
 # Third party modules
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 from pydantic_settings import (PydanticBaseSettingsSource,
                                BaseSettings, SettingsConfigDict)
 
@@ -47,16 +46,9 @@ class CommonConfig(BaseSettings):
                                       env_file_encoding='utf-8',
                                       env_file=Path(__file__).parent / '.env')
 
-    # Hardcoded REST method (GET, POST) calling parameters.
-    url_timeout: tuple = (1.0, 5.0)
-    hdr_data: dict = {'Content-Type': 'application/json'}
-
     # project
     name: str = MISSING_ENV
     version: str = MISSING_ENV
-
-    # Service parameters.
-    service_user: str = MISSING_ENV
     service_name: str = MISSING_ENV
 
     # Logging and environment dependable parameters.
@@ -69,6 +61,16 @@ class CommonConfig(BaseSettings):
     mongo_url: str = MISSING_SECRET
     rabbit_url: str = MISSING_SECRET
     service_pwd: str = MISSING_SECRET
+
+    # Hardcoded REST method (GET, POST) calling parameters.
+    url_timeout: tuple = (1.0, 5.0)
+
+    @computed_field
+    @property
+    def hdr_data(self) -> dict:
+        """ Use a defined secret as a value. """
+        return {'Content-Type': 'application/json',
+                'X-API-Key': f'{self.service_pwd}'}
 
     @classmethod
     def settings_customise_sources(
