@@ -6,8 +6,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-18 09:44:19
-     $Rev: 32
+    $Date: 2023-07-23 19:52:14
+     $Rev: 38
 """
 
 # BUILTIN modules
@@ -55,9 +55,8 @@ async def send_restful_response(url: str, result: dict):
 
     try:
         async with AsyncClient() as client:
-            resp = await client.post(url=url, json=result,
-                                     auth=(config.service_user, config.service_pwd),
-                                     timeout=config.url_timeout, headers=config.hdr_data)
+            resp = await client.post(url=url, timeout=config.url_timeout,
+                                     json=result, headers=config.hdr_data)
 
         if resp.status_code == 202:
             logger.success(f"Sent POST response to URL {url} - "
@@ -137,10 +136,12 @@ def response_handler(task: callable, status: str, retval: Any,
 
 # ---------------------------------------------------------
 #
-@WORKER.task(name='tasks.processor',
-             after_return=response_handler,
-             autoretry_for=(BaseException,),
-             bind=True, default_retry_delay=10, max_retries=2)
+@WORKER.task(
+    name='tasks.processor',
+    after_return=response_handler,
+    autoretry_for=(BaseException,),
+    bind=True, default_retry_delay=10, max_retries=2
+)
 def processor(task: callable, payload: dict) -> dict:
     """ Let's simulate a long-running task here.
 
