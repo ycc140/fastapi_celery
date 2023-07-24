@@ -9,7 +9,8 @@ services:
         BUILD_ENV: prod
     container_name: celery_service
     command: [gunicorn, -w=2, -k=uvicorn.workers.UvicornWorker, -b=:7000,
-              --log-config=gunicorn.conf, --worker-tmp-dir=/dev/shm, src.main:app]
+              --log-config=gunicorn.conf, --worker-tmp-dir=/dev/shm, src.main:app,
+              --certfile=251024-cert.pem, --keyfile=251024-key.pem]
     restart: always
     ports:
       - "8200:7000"

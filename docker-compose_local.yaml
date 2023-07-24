@@ -9,7 +9,8 @@ services:
         BUILD_ENV: local
     container_name: celery_service
     command: [uvicorn, --reload, --host=0.0.0.0, --port=7000,
-              --log-config=uvicorn.json, src.main:app]
+              --log-config=uvicorn.json, src.main:app,
+              --ssl-certfile=251024-cert.pem, --ssl-keyfile=251024-key.pem]
     volumes:
       - ./src/:/home/app/src/
     ports:

@@ -54,6 +54,9 @@ WORKDIR $APP_HOME
 # copy project and chown all the files to the app user
 COPY --chown=app:app src $APP_HOME/src
 
+# copy client certificates to the app user
+COPY certs $APP_HOME
+
 # Use argument parameter to create required config files.
 ARG BUILD_ENV
 

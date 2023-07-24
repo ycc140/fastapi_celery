@@ -7,8 +7,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-12 06:44:07
-     $Rev: 12
+    $Date: 2023-07-24 11:01:45
+     $Rev: 40
 """
 
 # BUILTIN modules
@@ -24,8 +24,10 @@ from src.config.setup import config
 
 if __name__ == "__main__":
 
-    uv_config = {'app': 'src.main:app', 'log_level': config.log_level, 'reload': True,
-                 'log_config': {"disable_existing_loggers": False, "version": 1}}
+    uv_config = {'ssl_keyfile': "certs/251024-key.pem",
+                 'ssl_certfile': "certs/251024-cert.pem",
+                 'log_config': {"disable_existing_loggers": False, "version": 1},
+                 'app': 'src.main:app', 'log_level': config.log_level, 'reload': True}
 
     # So you can se test the handling of different log levels.
     app.logger.debug(f'{config.name} v{config.version} has initiated...')
