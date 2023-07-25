@@ -6,8 +6,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-18 20:36:15
-     $Rev: 36
+    $Date: 2023-07-24 19:41:02
+     $Rev: 41
 """
 
 # BUILTIN modules
@@ -40,7 +40,7 @@ async def _get_celery_worker_status() -> List[ResourceModel]:
 
         else:
             logger.error('No active workers found.')
-            result +=  [ResourceModel(name='Celery.worker', status=False)]
+            result += [ResourceModel(name='Celery.worker', status=False)]
 
     except BaseException as why:
         logger.error(f'WORKER: {why}')
@@ -72,6 +72,7 @@ async def _get_celery_main_status() -> list:
     result += [ResourceModel(name='Celery.broker (RabbitMq)', status=broker_state)]
 
     try:
+        # noinspection PyProtectedMember
         WORKER.backend._get_connection().server_info()
         backend_state = True
 

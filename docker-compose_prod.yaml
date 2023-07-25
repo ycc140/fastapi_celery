@@ -8,9 +8,9 @@ services:
       args:
         BUILD_ENV: prod
     container_name: celery_service
-    command: [gunicorn, -w=2, -k=uvicorn.workers.UvicornWorker, -b=:7000,
-              --log-config=gunicorn.conf, --worker-tmp-dir=/dev/shm, src.main:app,
-              --certfile=251024-cert.pem, --keyfile=251024-key.pem]
+    command: [ gunicorn, -w=2, -k=uvicorn.workers.UvicornWorker, -b=:7000,
+               --log-config=gunicorn.conf, --worker-tmp-dir=/dev/shm, src.main:app,
+               --certfile=251024-cert.pem, --keyfile=251024-key.pem ]
     restart: always
     ports:
       - "8200:7000"
@@ -32,7 +32,7 @@ services:
       args:
         BUILD_ENV: prod
     container_name: celery_worker
-    command: [celery, --app=src.tasks, worker, --loglevel=info, --task-events]
+    command: [ celery, --app=src.tasks, worker, --loglevel=info, --task-events ]
     restart: always
     secrets:
       - mongo_url
@@ -48,8 +48,8 @@ services:
       context: .
       dockerfile: Dockerfile.flower
     container_name: celery_dashboard
-    command: [celery, --broker=amqp://guest:guest@rabbitmq/%2F,
-              flower, --broker-api=http://guest:guest@rabbitmq:15672/api/]
+    command: [ celery, --broker=amqp://guest:guest@rabbitmq/%2F,
+               flower, --broker-api=http://guest:guest@rabbitmq:15672/api/ ]
     restart: always
     ports:
       - "5555:5555"
@@ -59,12 +59,12 @@ services:
       - service_net
 
 secrets:
-    service_pwd:
-      file: C:/Users/ander/AppData/Roaming/Python/secrets/service_pwd
-    mongo_url:
-      file: C:/Users/ander/AppData/Roaming/Python/secrets/mongo_prod_url
-    rabbit_url:
-      file: C:/Users/ander/AppData/Roaming/Python/secrets/rabbit_prod_url
+  service_pwd:
+    file: C:/Users/ander/AppData/Roaming/Python/secrets/service_pwd
+  mongo_url:
+    file: C:/Users/ander/AppData/Roaming/Python/secrets/mongo_prod_url
+  rabbit_url:
+    file: C:/Users/ander/AppData/Roaming/Python/secrets/rabbit_prod_url
 
 networks:
   service_net:

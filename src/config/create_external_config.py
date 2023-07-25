@@ -6,8 +6,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-16 12:39:15
-     $Rev: 23
+    $Date: 2023-07-24 19:41:02
+     $Rev: 41
 """
 
 # BUILTIN modules
@@ -33,7 +33,7 @@ class DockerApiConfigManager:
     This class handles the creating of uvicorn and gunicorn log config files
     based on the environment and the content of the .env file.
 
-    When the Docker build environment is LOCAL a uvicorn.json is created
+    When the Docker build environment is LOCAL an uvicorn.json is created
     from the config/uvicorn.template file updated with the log level from
     the global log config file.
 
@@ -82,7 +82,6 @@ class DockerApiConfigManager:
         with open(f'{CWD.parent.parent}/uvicorn.json', 'w') as hdl:
             json.dump(template, hdl, indent=4)
 
-
     # ---------------------------------------------------------
     #
     def _create_gunicorn_file(self):
@@ -114,7 +113,6 @@ class DockerApiConfigManager:
         with open(f'{CWD.parent.parent}/gunicorn.conf', 'w') as hdl:
             ini_config.write(hdl)
 
-
     # ---------------------------------------------------------
     #
     def create_config_files(self):
@@ -137,7 +135,6 @@ class DockerApiConfigManager:
 # ---------------------------------------------------------
 
 if __name__ == '__main__':
-
     # For config to work here we have to set the
     # environment BEFORE we import the config module.
     os.environ['ENVIRONMENT'] = BUILD

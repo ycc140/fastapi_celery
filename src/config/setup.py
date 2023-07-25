@@ -6,8 +6,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-23 19:52:14
-     $Rev: 38
+    $Date: 2023-07-25 06:54:49
+     $Rev: 43
 """
 
 # BUILTIN modules
@@ -60,7 +60,7 @@ class CommonConfig(BaseSettings):
     # External resource parameters.
     mongo_url: str = MISSING_SECRET
     rabbit_url: str = MISSING_SECRET
-    service_pwd: str = MISSING_SECRET
+    service_api_key: str = MISSING_SECRET
 
     # Hardcoded REST method (GET, POST) calling parameters.
     url_timeout: tuple = (1.0, 5.0)
@@ -70,16 +70,16 @@ class CommonConfig(BaseSettings):
     def hdr_data(self) -> dict:
         """ Use a defined secret as a value. """
         return {'Content-Type': 'application/json',
-                'X-API-Key': f'{self.service_pwd}'}
+                'X-API-Key': f'{self.service_api_key}'}
 
     @classmethod
     def settings_customise_sources(
-        cls,
-        settings_cls: Type[BaseSettings],
-        init_settings: PydanticBaseSettingsSource,
-        env_settings: PydanticBaseSettingsSource,
-        dotenv_settings: PydanticBaseSettingsSource,
-        file_secret_settings: PydanticBaseSettingsSource,
+            cls,
+            settings_cls: Type[BaseSettings],
+            env_settings: PydanticBaseSettingsSource,
+            init_settings: PydanticBaseSettingsSource,
+            dotenv_settings: PydanticBaseSettingsSource,
+            file_secret_settings: PydanticBaseSettingsSource,
     ) -> Tuple[PydanticBaseSettingsSource, ...]:
         """ Change source priority order (ignore environment values). """
         return init_settings, dotenv_settings, file_secret_settings

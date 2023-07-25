@@ -7,8 +7,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-18 09:44:19
-     $Rev: 32
+    $Date: 2023-07-24 19:41:02
+     $Rev: 41
 """
 
 # BUILTIN modules
@@ -52,6 +52,5 @@ async def receiver():
 # ---------------------------------------------------------
 
 if __name__ == "__main__":
-
     with contextlib.suppress(KeyboardInterrupt):
         asyncio.run(receiver())

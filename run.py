@@ -7,8 +7,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-24 11:01:45
-     $Rev: 40
+    $Date: 2023-07-24 19:41:02
+     $Rev: 41
 """
 
 # BUILTIN modules
@@ -21,9 +21,7 @@ import uvicorn
 from src.main import app
 from src.config.setup import config
 
-
 if __name__ == "__main__":
-
     uv_config = {'ssl_keyfile': "certs/251024-key.pem",
                  'ssl_certfile': "certs/251024-cert.pem",
                  'log_config': {"disable_existing_loggers": False, "version": 1},

@@ -6,8 +6,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-15 13:49:23
-     $Rev: 20
+    $Date: 2023-07-24 21:14:46
+     $Rev: 42
 """
 
 # Third party modules
@@ -34,7 +34,9 @@ ROUTER = APIRouter(prefix="/v1/process", tags=["Process endpoints"])
 def get_task_meta(task_id: UUID4) -> dict:
     """ Return metadata for specified task.
 
-    Note: this is an ugly workaround since there's a bug in the
+    Celery bug report: #8387 (for Celery 5.3.1).
+
+    This is an ugly workaround since there's a bug in the
     celery.backends.mongodb.py module. It does not return the
     extended metadata when the result_extended config parameter
     is set to True, otherwise that call would have been:
@@ -69,6 +71,7 @@ async def process_payload(payload: dict) -> ProcessResponseModel:
         errmsg = f'Celery task initialization failed: {why}'
         logger.error(errmsg)
         raise HTTPException(status_code=500, detail=errmsg)
+
 
 # ---------------------------------------------------------
 #

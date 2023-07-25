@@ -6,14 +6,12 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-13 01:03:42
-     $Rev: 18
+    $Date: 2023-07-24 19:41:02
+     $Rev: 41
 """
-
 
 # Local modules
 from .setup import config
-
 
 # ---------------------------------------------------------
 
@@ -33,7 +31,7 @@ imports = ('src.tasks',)
 # Normalize logging format.
 worker_log_format = '%(asctime)s | %(levelname)-8s | %(processName)s | %(message)s'
 worker_task_log_format = '%(asctime)s | %(levelname)-8s | %(processName)s | ' \
-                              '%(task_name)s[%(task_id)s] | %(message)s'
+                         '%(task_name)s[%(task_id)s] | %(message)s'
 
 # Decrease the message rates substantially.
 worker_send_task_event = False

@@ -6,8 +6,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-23 19:52:14
-     $Rev: 38
+    $Date: 2023-07-25 06:54:49
+     $Rev: 43
 """
 
 # Third party modules
@@ -31,7 +31,7 @@ def validate_authentication(api_key: str = Security(API_KEY_HEADER)):
     :raise HTTPException(401): When incorrect API key is supplied.
     """
 
-    if api_key != config.service_pwd:
+    if api_key != config.service_api_key:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or missing API Key",

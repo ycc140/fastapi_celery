@@ -6,36 +6,35 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-18 20:48:58
-     $Rev: 37
+    $Date: 2023-07-24 19:41:02
+     $Rev: 41
 """
 
 # Local modules
 from ..config.setup import config
 
-
 resource_example = {
-  "name": "ProcessingService",
-  "status": True,
-  "version": "1.4.2",
-  "resources": [
-    {
-      "name": "Celery.broker (RabbitMq)",
-      "status": True
-    },
-    {
-      "name": "Celery.backend (MongoDb)",
-      "status": True
-    },
-    {
-      "name": "Celery.worker (celery@e7dc920209c7)",
-      "status": True
-    },
-    {
-      "name": "Celery.worker (celery@CHARON)",
-      "status": True
-    }
-  ]
+    "name": "ProcessingService",
+    "status": True,
+    "version": "1.4.2",
+    "resources": [
+        {
+            "name": "Celery.broker (RabbitMq)",
+            "status": True
+        },
+        {
+            "name": "Celery.backend (MongoDb)",
+            "status": True
+        },
+        {
+            "name": "Celery.worker (celery@e7dc920209c7)",
+            "status": True
+        },
+        {
+            "name": "Celery.worker (celery@CHARON)",
+            "status": True
+        }
+    ]
 }
 
 status_example = {
@@ -44,14 +43,14 @@ status_example = {
 }
 
 process_example = {
-  "status": "PENDING",
-  "id": "94624ffb-d5e8-4fbb-a760-dbdef0abb46f"
+    "status": "PENDING",
+    "id": "94624ffb-d5e8-4fbb-a760-dbdef0abb46f"
 }
 
 retry_example = {
-  "status": "PENDING",
-  "task_id": "9a8e43a6-be5b-41da-8cd1-b6ba78222417",
-  "failed_id": "94624ffb-d5e8-4fbb-a760-dbdef0abb46f"
+    "status": "PENDING",
+    "task_id": "9a8e43a6-be5b-41da-8cd1-b6ba78222417",
+    "failed_id": "94624ffb-d5e8-4fbb-a760-dbdef0abb46f"
 }
 
 tags_metadata = [

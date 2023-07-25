@@ -6,8 +6,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-23 19:52:14
-     $Rev: 38
+    $Date: 2023-07-24 19:41:02
+     $Rev: 41
 """
 
 # BUILTIN modules
@@ -32,7 +32,6 @@ from .tools.custom_logging import create_unified_logger
 # Constants
 WORKER = Celery(__name__)
 """ Celery worker instance. """
-
 
 # ---------------------------------------------------------
 
