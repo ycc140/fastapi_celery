@@ -6,12 +6,13 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-12 06:44:07
-     $Rev: 12
+    $Date: 2023-08-27 15:46:50
+     $Rev: 48
 """
 
 # BUILTIN modules
 import json
+from typing import Any
 from pathlib import Path
 
 # Third party modules
@@ -20,7 +21,7 @@ from fastapi.staticfiles import StaticFiles
 
 # local modules
 from .config.setup import config
-from .api import process_routes, helth_route
+from .api import process_routes, health_route
 from .tools.custom_logging import create_unified_logger
 from .api.documentation import (license_info, tags_metadata, description)
 
@@ -39,7 +40,7 @@ class Service(FastAPI):
 
     # ---------------------------------------------------------
     #
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         """ The class constructor.
 
         :param args: named arguments.
@@ -55,7 +56,7 @@ class Service(FastAPI):
         # Add declared router information (note that
         # the order is related to the documentation order).
         self.include_router(process_routes.ROUTER)
-        self.include_router(helth_route.ROUTER)
+        self.include_router(health_route.ROUTER)
 
         # Unify logging within the imported package's closure.
         self.logger = create_unified_logger()
