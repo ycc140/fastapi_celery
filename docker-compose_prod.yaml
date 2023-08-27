@@ -17,7 +17,7 @@ services:
     secrets:
       - mongo_url
       - rabbit_url
-      - service_pwd
+      - service_api_key
     depends_on:
       - dashboard
       - worker
@@ -37,7 +37,7 @@ services:
     secrets:
       - mongo_url
       - rabbit_url
-      - service_pwd
+      - service_api_key
     environment:
       - ENVIRONMENT=prod
     networks:
@@ -59,8 +59,8 @@ services:
       - service_net
 
 secrets:
-  service_pwd:
-    file: C:/Users/ander/AppData/Roaming/Python/secrets/service_pwd
+  service_api_key:
+    file: C:/Users/ander/AppData/Roaming/Python/secrets/service_api_key
   mongo_url:
     file: C:/Users/ander/AppData/Roaming/Python/secrets/mongo_prod_url
   rabbit_url:
