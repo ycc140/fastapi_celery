@@ -6,8 +6,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-24 19:41:02
-     $Rev: 41
+    $Date: 2023-08-27 14:34:48
+     $Rev: 46
 """
 
 # Local modules
@@ -51,6 +51,21 @@ retry_example = {
     "status": "PENDING",
     "task_id": "9a8e43a6-be5b-41da-8cd1-b6ba78222417",
     "failed_id": "94624ffb-d5e8-4fbb-a760-dbdef0abb46f"
+}
+
+process_request_body_example = {
+    "queue": {
+        "summary": "responseQueue",
+        "value": {"msg": "test-01 today",
+                  "responseQueue": "CallerService"}},
+    "url": {
+        "summary": "responseUrl",
+        "value": {"msg": "test-02 today",
+                  "responseUrl": "http://localhost:8001/v1/response"}},
+    "docker": {
+        "summary": "local Docker responseUrl",
+        "value": {"msg": "test-03 today",
+                  "responseUrl": "http://host.docker.internal:8001/v1/response"}}
 }
 
 tags_metadata = [

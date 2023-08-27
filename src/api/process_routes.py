@@ -6,20 +6,24 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-24 21:14:46
-     $Rev: 42
+    $Date: 2023-08-27 14:34:48
+     $Rev: 46
 """
+
+# BUILTIN modules
+from typing import Annotated
 
 # Third party modules
 from loguru import logger
 from pydantic import UUID4
 from celery.result import AsyncResult
 from kombu.exceptions import OperationalError
-from fastapi import HTTPException, Depends, APIRouter
+from fastapi import HTTPException, Depends, APIRouter, Body
 
 # local modules
 from ..tasks import processor, WORKER
 from ..tools.security import validate_authentication
+from .documentation import process_request_body_example
 from .models import (NotFoundError, UnknownError, BadStateError,
                      ProcessResponseModel, StatusResponseModel,
                      RetryResponseModel)
@@ -34,7 +38,7 @@ ROUTER = APIRouter(prefix="/v1/process", tags=["Process endpoints"])
 def get_task_meta(task_id: UUID4) -> dict:
     """ Return metadata for specified task.
 
-    Celery bug report: #8387 (for Celery 5.3.1).
+    Celery bug report #8387 and pull request #8391 (for Celery 5.3.1).
 
     This is an ugly workaround since there's a bug in the
     celery.backends.mongodb.py module. It does not return the
@@ -58,7 +62,10 @@ def get_task_meta(task_id: UUID4) -> dict:
              response_model=ProcessResponseModel,
              responses={500: {"model": UnknownError}},
              dependencies=[Depends(validate_authentication)])
-async def process_payload(payload: dict) -> ProcessResponseModel:
+async def process_payload(payload: Annotated[
+    dict,
+    Body(openapi_examples=process_request_body_example)
+]) -> ProcessResponseModel:
     """**Trigger Celery task processing of specified payload.**"""
 
     try:
