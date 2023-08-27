@@ -6,8 +6,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-15 16:23:58
-     $Rev: 22
+    $Date: 2023-08-27 14:44:51
+     $Rev: 47
 """
 
 # BUILTIN modules
@@ -80,7 +80,7 @@ class HealthResponseModel(BaseModel):
     :ivar name: Service name.
     :ivar status: Overall health status
     :ivar version: Service version.
-    :ivar resources: Status for individual resources..
+    :ivar resources: Status for individual resources.
     """
 
     name: str
