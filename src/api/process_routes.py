@@ -6,8 +6,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-09-06 14:13:38
-     $Rev: 50
+    $Date: 2023-09-06 14:59:18
+     $Rev: 51
 """
 
 # BUILTIN modules
