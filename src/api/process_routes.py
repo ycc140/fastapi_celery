@@ -6,8 +6,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-08-27 14:34:48
-     $Rev: 46
+    $Date: 2023-09-06 14:13:38
+     $Rev: 50
 """
 
 # BUILTIN modules
@@ -31,29 +31,6 @@ from .models import (NotFoundError, UnknownError, BadStateError,
 # Constants
 ROUTER = APIRouter(prefix="/v1/process", tags=["Process endpoints"])
 """ Process API endpoint router. """
-
-
-# ---------------------------------------------------------
-#
-def get_task_meta(task_id: UUID4) -> dict:
-    """ Return metadata for specified task.
-
-    Celery bug report #8387 and pull request #8391 (for Celery 5.3.1).
-
-    This is an ugly workaround since there's a bug in the
-    celery.backends.mongodb.py module. It does not return the
-    extended metadata when the result_extended config parameter
-    is set to True, otherwise that call would have been:
-
-        WORKER.backend.get_task_meta(str(task_id))
-
-    :param task_id: Metadata for queried task.
-    :return:query result:
-    """
-
-    # noinspection PyProtectedMember
-    conn = WORKER.backend._get_connection()
-    return conn.service_results.celery_taskmeta.find_one({'_id': str(task_id)})
 
 
 # ---------------------------------------------------------
@@ -91,7 +68,7 @@ async def retry_failed_task(failed_id: UUID4) -> RetryResponseModel:
     """**Trigger a retry for a previously failed task.**"""
 
     # Extract and return Celery processing status from DB.
-    if meta := get_task_meta(failed_id):
+    if meta := WORKER.backend.get_task_meta(str(failed_id)):
 
         if meta['status'] == 'FAILURE':
             task = WORKER.tasks[meta['name']]
@@ -119,7 +96,7 @@ async def check_task_status(task_id: UUID4) -> StatusResponseModel:
     """**Return specified Celery task progress status.**"""
 
     # Extract and return Celery processing status from DB.
-    if not get_task_meta(task_id):
+    if not WORKER.backend.get_task_meta(str(task_id)):
         raise HTTPException(status_code=404,
                             detail=f"Task ID {task_id} does not exist")
 
