@@ -5,10 +5,11 @@ Copyright: Wilde Consulting
   License: Apache 2.0
 
 VERSION INFO::
+
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-24 19:41:02
-     $Rev: 41
+    $Date: 2024-03-18 22:09:25
+     $Rev: 1
 """
 
 # BUILTIN modules
@@ -42,7 +43,7 @@ async def receiver():
     connection = await asyncio.create_task(client.start_subscription())
 
     try:
-        # Wait until terminate
+        # Wait until termination.
         await asyncio.Future()
 
     finally:

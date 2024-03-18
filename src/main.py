@@ -4,10 +4,11 @@ Copyright: Wilde Consulting
   License: Apache 2.0
 
 VERSION INFO::
+
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-08-27 15:46:50
-     $Rev: 48
+    $Date: 2024-03-18 22:09:25
+     $Rev: 1
 """
 
 # BUILTIN modules
@@ -43,8 +44,8 @@ class Service(FastAPI):
     def __init__(self, *args: Any, **kwargs: Any):
         """ The class constructor.
 
-        :param args: named arguments.
-        :param kwargs: key-value pair arguments.
+        :param args: Named arguments.
+        :param kwargs: Key-value pair arguments.
         """
 
         super().__init__(*args, **kwargs)

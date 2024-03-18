@@ -4,10 +4,11 @@ Copyright: Wilde Consulting
   License: Apache 2.0
 
 VERSION INFO::
+
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-08-27 15:46:50
-     $Rev: 48
+    $Date: 2024-03-18 22:09:25
+     $Rev: 1
 """
 
 # Third party modules
@@ -30,7 +31,7 @@ ROUTER = APIRouter(prefix="/health", tags=["Health endpoint"])
     response_model=HealthResponseModel,
     responses={500: {"model": HealthStatusError}},
 )
-async def health_check() -> HealthResponseModel:
+async def health_check() -> JSONResponse:
     """ **Return connection status for Celery workers.** """
 
     content = await get_health_status()

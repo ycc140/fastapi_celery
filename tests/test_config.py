@@ -4,10 +4,11 @@ Copyright: Wilde Consulting
   License: Apache 2.0
 
 VERSION INFO::
+
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-25 07:27:21
-     $Rev: 44
+    $Date: 2024-03-18 22:09:25
+     $Rev: 1
 """
 
 # Third party modules

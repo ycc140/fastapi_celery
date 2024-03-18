@@ -4,10 +4,11 @@ Copyright: Wilde Consulting
   License: Apache 2.0
 
 VERSION INFO::
+
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-24 19:41:02
-     $Rev: 41
+    $Date: 2024-03-18 22:09:25
+     $Rev: 1
 """
 
 # BUILTIN modules
@@ -46,10 +47,10 @@ logger = create_unified_logger()
 # ---------------------------------------------------------
 #
 async def send_restful_response(url: str, result: dict):
-    """ Send processing result to calling service using a RESTful URL call.
+    """ Send a processing result to calling service using a RESTful URL call.
 
     :param url: External service callback URL.
-    :param result: processing result.
+    :param result: Processing result.
     """
 
     try:
@@ -83,7 +84,7 @@ async def send_rabbit_response(queue_name: str, result: dict):
         await client.publish_message(queue_name, result)
         logger.success(f"Sent response to RabbitMQ queue {queue_name}.")
 
-    except BaseException as why:
+    except Exception as why:
         logger.error(f"No connection with RabbitMQ queue {queue_name}: {why}")
 
 
@@ -95,11 +96,11 @@ def response_handler(task: callable, status: str, retval: Any,
     Return the processing response, good or bad when the task is finished
     when the caller has requested it.
 
-    When the 'responseUrl' parameter is one of the input arguments the
+    When the 'responseUrl' parameter is one of the input arguments, the
     processing result is returned to the caller by using a RESTful
     POST call to the specified callback URL.
 
-    When the 'responseQueue' parameter is one of the input arguments
+    When the 'responseQueue' parameter is one of the input arguments,
     the processing result is returned to the caller by publishing it
     on the specified RabbitMQ queue.
 
@@ -148,7 +149,7 @@ def processor(task: callable, payload: dict) -> dict:
     then to be able to test the retry functionality.
 
     :param task: Current task.
-    :param payload: Process received message.
+    :param payload: Process the received payload.
     :return: Processing response.
     """
 

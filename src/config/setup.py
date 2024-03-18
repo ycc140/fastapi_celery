@@ -4,10 +4,11 @@ Copyright: Wilde Consulting
   License: Apache 2.0
 
 VERSION INFO::
+
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-25 06:54:49
-     $Rev: 43
+    $Date: 2024-03-18 22:09:25
+     $Rev: 1
 """
 
 # BUILTIN modules
@@ -17,7 +18,7 @@ from pathlib import Path
 from typing import Type, Tuple
 
 # Third party modules
-from pydantic import BaseModel, computed_field
+from pydantic import BaseModel, Field, computed_field
 from pydantic_settings import (PydanticBaseSettingsSource,
                                BaseSettings, SettingsConfigDict)
 
@@ -26,12 +27,12 @@ MISSING_ENV = '>>> missing ENV value <<<'
 """ Error message for missing values in the .env file. """
 MISSING_SECRET = '>>> missing SECRETS file <<<'
 """ Error message for missing secrets file. """
+ENVIRONMENT = environ.get('ENVIRONMENT', 'dev')
+""" Current platform environment. """
 SECRETS_DIR = ('/run/secrets'
                if Path('/.dockerenv').exists()
                else f'{site.USER_BASE}/secrets')
 """ This is where your secrets are stored (in Docker or locally). """
-ENVIRONMENT = environ.get('ENVIRONMENT', 'dev')
-""" Current platform environment. """
 
 
 # -----------------------------------------------------------------------------
@@ -55,12 +56,12 @@ class CommonConfig(BaseSettings):
     log_level: str = MISSING_ENV
     log_format: str = MISSING_ENV
     flower_host: str = MISSING_ENV
-    log_diagnose: bool = MISSING_ENV
+    log_diagnose: bool | str = MISSING_ENV
 
     # External resource parameters.
-    mongo_url: str = MISSING_SECRET
-    rabbit_url: str = MISSING_SECRET
     service_api_key: str = MISSING_SECRET
+    mongo_url: str = Field(MISSING_SECRET, alias=f'mongo_url_{ENVIRONMENT}')
+    rabbit_url: str = Field(MISSING_SECRET, alias=f'rabbit_url_root_{ENVIRONMENT}')
 
     # Hardcoded REST method (GET, POST) calling parameters.
     url_timeout: tuple = (1.0, 5.0)
@@ -90,7 +91,7 @@ class CommonConfig(BaseSettings):
 class DockerLocal(BaseModel):
     """ Configuration parameters unique for Docker local environment.
 
-    No environment values, .env or secrets files are read in this class.
+    No environment values, .env or secret files are read in this class.
 
     These values will override the values in the CommonConfig class.
     """

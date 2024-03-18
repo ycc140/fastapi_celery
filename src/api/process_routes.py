@@ -4,10 +4,11 @@ Copyright: Wilde Consulting
   License: Apache 2.0
 
 VERSION INFO::
+
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-09-06 14:59:18
-     $Rev: 51
+    $Date: 2024-03-18 22:09:25
+     $Rev: 1
 """
 
 # BUILTIN modules
@@ -46,7 +47,7 @@ async def process_payload(payload: Annotated[
     """**Trigger Celery task processing of specified payload.**"""
 
     try:
-        # Add payload message to Celery for processing.
+        # Add a payload message to Celery for processing.
         result = processor.delay(payload)
         logger.debug(f'Added task [{result.id}] to Celery for processing')
         return ProcessResponseModel(status=result.state, id=result.id)

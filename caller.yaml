@@ -85,7 +85,7 @@ components:
             - SUCCESS
             - FAILURE
         result:
-            $ref: '#/components/schemas/ResultSchema'
+          $ref: '#/components/schemas/ResultSchema'
 
     CallerResponse:
       type: object

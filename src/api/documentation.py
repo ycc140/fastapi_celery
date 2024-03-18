@@ -4,19 +4,21 @@ Copyright: Wilde Consulting
   License: Apache 2.0
 
 VERSION INFO::
+
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-08-27 14:34:48
-     $Rev: 46
+    $Date: 2024-03-18 22:09:25
+     $Rev: 1
 """
 
 # Local modules
 from ..config.setup import config
 
-resource_example = {
+health_example = {
     "name": "ProcessingService",
     "status": True,
     "version": "1.4.2",
+    "cert_remaining_days": 586,
     "resources": [
         {
             "name": "Celery.broker (RabbitMq)",
@@ -32,6 +34,10 @@ resource_example = {
         },
         {
             "name": "Celery.worker (celery@CHARON)",
+            "status": True
+        },
+        {
+            "name": "Certificate.valid",
             "status": True
         }
     ]

@@ -2,7 +2,7 @@
 # -------------------------------------
 # first stage
 #
-FROM python:alpine as build
+FROM python:alpine AS build
 
 # set work directory
 WORKDIR /usr/src/app
@@ -25,7 +25,7 @@ RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requir
 # -------------------------------------
 # second stage
 #
-FROM python:alpine as final
+FROM python:alpine AS final
 
 # Copy created wheels from build stage
 COPY --from=build /usr/src/app/wheels /wheels
@@ -46,7 +46,7 @@ RUN set -eux; \
     rm -rf /var/lib/apk/lists/*; \
     rm -rf /wheels/*; \
     # Set local timezone (needs to be done before changing user).
-    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+    ln -snf /usr/share/zoneinfo/"$TZ" /etc/localtime && echo "$TZ" > /etc/timezone
 
 # set work directory
 WORKDIR $APP_HOME

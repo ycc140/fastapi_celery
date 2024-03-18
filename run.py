@@ -5,10 +5,11 @@ Copyright: Wilde Consulting
   License: Apache 2.0
 
 VERSION INFO::
+
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-24 19:41:02
-     $Rev: 41
+    $Date: 2024-03-18 22:09:25
+     $Rev: 1
 """
 
 # BUILTIN modules
@@ -22,8 +23,8 @@ from src.main import app
 from src.config.setup import config
 
 if __name__ == "__main__":
-    uv_config = {'ssl_keyfile': "certs/251024-key.pem",
-                 'ssl_certfile': "certs/251024-cert.pem",
+    uv_config = {'ssl_keyfile': "certs/private-key.pem",
+                 'ssl_certfile': "certs/public-cert.pem",
                  'log_config': {"disable_existing_loggers": False, "version": 1},
                  'app': 'src.main:app', 'log_level': config.log_level, 'reload': True}
 

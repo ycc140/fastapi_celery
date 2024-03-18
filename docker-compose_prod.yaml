@@ -10,14 +10,14 @@ services:
     container_name: celery_service
     command: [ gunicorn, -w=2, -k=uvicorn.workers.UvicornWorker, -b=:7000,
                --log-config=gunicorn.conf, --worker-tmp-dir=/dev/shm, src.main:app,
-               --certfile=251024-cert.pem, --keyfile=251024-key.pem ]
+               --certfile=public-cert.pem, --keyfile=private-key.pem ]
     restart: always
     ports:
       - "8200:7000"
     secrets:
-      - mongo_url
-      - rabbit_url
+      - mongo_url_prod
       - service_api_key
+      - rabbit_url_root_prod
     depends_on:
       - dashboard
       - worker
@@ -35,9 +35,9 @@ services:
     command: [ celery, --app=src.tasks, worker, --loglevel=info, --task-events ]
     restart: always
     secrets:
-      - mongo_url
-      - rabbit_url
+      - mongo_url_prod
       - service_api_key
+      - rabbit_url_root_prod
     environment:
       - ENVIRONMENT=prod
     networks:
@@ -61,10 +61,10 @@ services:
 secrets:
   service_api_key:
     file: C:/Users/ander/AppData/Roaming/Python/secrets/service_api_key
-  mongo_url:
-    file: C:/Users/ander/AppData/Roaming/Python/secrets/mongo_prod_url
-  rabbit_url:
-    file: C:/Users/ander/AppData/Roaming/Python/secrets/rabbit_prod_url
+  mongo_url_prod:
+    file: C:/Users/ander/AppData/Roaming/Python/secrets/mongo_url_prod
+  rabbit_url_root_prod:
+    file: C:/Users/ander/AppData/Roaming/Python/secrets/rabbit_url_root_prod
 
 networks:
   service_net:
