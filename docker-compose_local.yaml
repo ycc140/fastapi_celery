@@ -10,7 +10,7 @@ services:
     container_name: celery_service
     command: [ uvicorn, --reload, --host=0.0.0.0, --port=7000,
                --log-config=uvicorn.json, src.main:app,
-               --ssl-certfile=public-cert.pem, --ssl-keyfile=private-key.pem ]
+               --ssl-certfile=certs/public-cert.pem, --ssl-keyfile=certs/private-key.pem ]
     volumes:
       - ./src/:/home/app/src/
     ports:

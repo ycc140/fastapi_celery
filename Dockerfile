@@ -55,7 +55,7 @@ WORKDIR $APP_HOME
 COPY --chown=app:app src $APP_HOME/src
 
 # copy client certificates to the app user
-COPY certs $APP_HOME
+COPY certs $APP_HOME/certs
 
 # Use argument parameter to create required config files.
 ARG BUILD_ENV
