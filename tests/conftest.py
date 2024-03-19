@@ -7,8 +7,8 @@ VERSION INFO::
 
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2024-03-18 22:09:25
-     $Rev: 1
+    $Date: 2024-03-19 20:45:39
+     $Rev: 5
 """
 
 # Third party modules
@@ -34,5 +34,5 @@ def anyio_backend():
 def test_app():
     """ Module fixture. """
 
-    with TestClient(app) as test_client:
+    with TestClient(app=app) as test_client:
         yield test_client

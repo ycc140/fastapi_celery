@@ -7,8 +7,8 @@ VERSION INFO::
 
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2024-03-19 20:02:51
-     $Rev: 4
+    $Date: 2024-03-19 20:45:39
+     $Rev: 5
 """
 
 # Third party modules
@@ -31,7 +31,8 @@ async def test_health(test_app: TestClient):
     transport = ASGITransport(app=test_app.app)
     worker_status = await get_celery_worker_status()
 
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
+    async with AsyncClient(transport=transport,
+                           base_url="http://testserver") as client:
         response = await client.get("/health")
 
     # The Celery worker is started.
