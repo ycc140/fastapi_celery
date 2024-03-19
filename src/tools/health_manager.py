@@ -7,8 +7,8 @@ VERSION INFO::
 
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2024-03-18 22:09:25
-     $Rev: 1
+    $Date: 2024-03-19 20:02:51
+     $Rev: 4
 """
 
 # BUILTIN modules
@@ -66,32 +66,6 @@ def _get_certificate_status(remaining_days: int) -> List[ResourceModel]:
 
 # ---------------------------------------------------------
 #
-async def _get_celery_worker_status() -> List[ResourceModel]:
-    """ Return Celery worker(s) connection status.
-
-    :return: Celery worker(s) connection status.
-    """
-    result = []
-
-    try:
-        if items := WORKER.control.ping(timeout=0.1):
-
-            for worker in [key for elem in items for key in elem.keys()]:
-                result += [ResourceModel(name=f'Celery.worker ({worker})', status=True)]
-
-        else:
-            logger.error('No active workers found.')
-            result += [ResourceModel(name='Celery.worker', status=False)]
-
-    except Exception as why:
-        logger.error(f'WORKER: {why}')
-        result += [ResourceModel(name='Celery.worker', status=False)]
-
-    return result
-
-
-# ---------------------------------------------------------
-#
 async def _get_celery_main_status() -> List[ResourceModel]:
     """ Return Celery RabbitMQ broker and MongoDB backend connection status.
 
@@ -127,6 +101,32 @@ async def _get_celery_main_status() -> List[ResourceModel]:
 
 # ---------------------------------------------------------
 #
+async def get_celery_worker_status() -> List[ResourceModel]:
+    """ Return Celery worker(s) connection status.
+
+    :return: Celery worker(s) connection status.
+    """
+    result = []
+
+    try:
+        if items := WORKER.control.ping(timeout=0.1):
+
+            for worker in [key for elem in items for key in elem.keys()]:
+                result += [ResourceModel(name=f'Celery.worker ({worker})', status=True)]
+
+        else:
+            logger.error('No active workers found.')
+            result += [ResourceModel(name='Celery.worker', status=False)]
+
+    except Exception as why:
+        logger.error(f'WORKER: {why}')
+        result += [ResourceModel(name='Celery.worker', status=False)]
+
+    return result
+
+
+# ---------------------------------------------------------
+#
 async def get_health_status() -> HealthResponseModel:
     """ Return Health status for used resources.
 
@@ -136,7 +136,7 @@ async def get_health_status() -> HealthResponseModel:
     days = await _get_certificate_remaining_days()
     resource_items += _get_certificate_status(days)
     resource_items += await _get_celery_main_status()
-    resource_items += await _get_celery_worker_status()
+    resource_items += await get_celery_worker_status()
     total_status = (all(key.status for key in resource_items)
                     if resource_items else False)
 

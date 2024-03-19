@@ -7,12 +7,9 @@ VERSION INFO::
 
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2024-03-19 18:30:47
-     $Rev: 3
+    $Date: 2024-03-19 20:02:51
+     $Rev: 4
 """
-
-# Third party modules
-from starlette.testclient import TestClient
 
 # local modules
 from ..src.config.setup import CommonConfig, DockerLocal, DockerProd
@@ -20,12 +17,8 @@ from ..src.config.setup import CommonConfig, DockerLocal, DockerProd
 
 # ---------------------------------------------------------
 #
-def test_dev_config(test_app: TestClient):
-    """ Test DEV config.
-
-    :param test_app: TestClient instance.
-    """
-
+def test_dev_config():
+    """ Test DEV config. """
     conf = CommonConfig()
 
     assert conf.flower_host == 'localhost'
@@ -36,12 +29,8 @@ def test_dev_config(test_app: TestClient):
 
 # ---------------------------------------------------------
 #
-def test_local_config(test_app: TestClient):
-    """ Test LOCAL config.
-
-    :param test_app: TestClient instance.
-    """
-
+def test_local_config():
+    """ Test LOCAL config. """
     _root_config = CommonConfig()
     _docker_env = DockerLocal().model_dump()
     conf = _root_config.model_copy(update=_docker_env)
@@ -51,12 +40,8 @@ def test_local_config(test_app: TestClient):
 
 # ---------------------------------------------------------
 #
-def test_prod_config(test_app: TestClient):
-    """ Test PROD config.
-
-    :param test_app: TestClient instance.
-    """
-
+def test_prod_config():
+    """ Test PROD config. """
     _root_config = CommonConfig()
     _docker_env = DockerProd().model_dump()
     conf = _root_config.model_copy(update=_docker_env)

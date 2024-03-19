@@ -7,30 +7,38 @@ VERSION INFO::
 
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2024-03-18 22:09:25
-     $Rev: 1
+    $Date: 2024-03-19 20:02:51
+     $Rev: 4
 """
 
 # Third party modules
 import pytest
-from httpx import AsyncClient
 from starlette.testclient import TestClient
+from httpx import AsyncClient, ASGITransport
 
-# This is the same as using the @pytest.mark.anyio
-# on all test functions in the module
-pytestmark = pytest.mark.anyio
+# local modules
+from ..src.tools.health_manager import get_celery_worker_status
 
 
 # ---------------------------------------------------------
 #
-async def test_normal_health(test_app: TestClient):
-    """ Test successful health endpoint.
+@pytest.mark.anyio
+async def test_health(test_app: TestClient):
+    """ Test successful or failed health endpoint.
 
     :param test_app: TestClient instance.
     """
+    transport = ASGITransport(app=test_app.app)
+    worker_status = await get_celery_worker_status()
 
-    async with AsyncClient(app=test_app.app, base_url="http://test") as client:
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.get("/health")
 
-    assert response.status_code == 200
-    assert response.json()['status'] is True
+    # The Celery worker is started.
+    if worker_status[0].status is True:
+        assert response.status_code == 200
+        assert response.json()['status'] is True
+
+    else:
+        assert response.status_code == 500
+        assert response.json()['status'] is False
