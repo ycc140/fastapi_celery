@@ -7,8 +7,8 @@ VERSION INFO::
 
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2024-03-18 22:09:25
-     $Rev: 1
+    $Date: 2024-03-19 18:30:47
+     $Rev: 3
 """
 
 # Third party modules
@@ -62,5 +62,5 @@ def test_prod_config(test_app: TestClient):
     conf = _root_config.model_copy(update=_docker_env)
 
     assert conf.log_level == 'info'
-    assert conf.log_diagnose == False
+    assert conf.log_diagnose is False
     assert conf.flower_host == 'dashboard'
