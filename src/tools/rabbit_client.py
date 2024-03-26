@@ -6,8 +6,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-18 09:44:19
-     $Rev: 32
+    $Date: 2024-03-26 01:08:38
+     $Rev: 6
 """
 
 # BUILTIN modules
@@ -48,9 +48,9 @@ class RabbitClient:
     # ---------------------------------------------------------
     #
     async def _process_incoming_message(self, message: AbstractIncomingMessage):
-        """ Processing incoming message from RabbitMQ.
+        """ Processing an incoming message from RabbitMQ.
 
-        :param message: Received message.
+        :param message: The received message.
         """
         if body := message.body:
             await self.message_handler(json.loads(body))
@@ -66,7 +66,7 @@ class RabbitClient:
         # Perform receive connection.
         connection = await connect_robust(loop=loop, url=self.rabbit_url)
 
-        # Creating receive channel and setting quality of service.
+        # Creating a receiver channel and setting quality of service.
         channel = await connection.channel()
 
         # To make sure the load is evenly distributed between the workers.
@@ -83,7 +83,7 @@ class RabbitClient:
     # ---------------------------------------------------------
     #
     async def publish_message(self, queue: str, message: dict):
-        """ Publish message on specified RabbitMQ queue asynchronously.
+        """ Publish a message on specified RabbitMQ queue asynchronously.
 
         :param queue: Publishing queue.
         :param message: Message to be published.
@@ -91,7 +91,7 @@ class RabbitClient:
         connection = await connect(url=self.rabbit_url)
         channel = await connection.channel()
 
-        # Create message and publish it.
+        # Create a message and publish it.
         message_body = Message(
             content_type='application/json',
             delivery_mode=DeliveryMode.PERSISTENT,
