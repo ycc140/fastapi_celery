@@ -6,8 +6,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-25 06:54:49
-     $Rev: 43
+    $Date: 2024-04-08 17:11:52
+     $Rev: 7
 """
 
 # Third party modules
@@ -15,7 +15,7 @@ from fastapi.security import APIKeyHeader
 from fastapi import HTTPException, Security, status
 
 # local modules
-from ..config.setup import config
+from src import config
 
 # Constants
 API_KEY_HEADER = APIKeyHeader(name="X-API-Key")

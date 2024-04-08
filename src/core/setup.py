@@ -7,8 +7,8 @@ VERSION INFO::
 
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2024-03-18 22:09:25
-     $Rev: 1
+    $Date: 2024-04-08 17:11:52
+     $Rev: 7
 """
 
 # BUILTIN modules
@@ -54,7 +54,6 @@ class CommonConfig(BaseSettings):
 
     # Logging and environment dependable parameters.
     log_level: str = MISSING_ENV
-    log_format: str = MISSING_ENV
     flower_host: str = MISSING_ENV
     log_diagnose: bool | str = MISSING_ENV
 
@@ -63,7 +62,7 @@ class CommonConfig(BaseSettings):
     mongo_url: str = Field(MISSING_SECRET, alias=f'mongo_url_{ENVIRONMENT}')
     rabbit_url: str = Field(MISSING_SECRET, alias=f'rabbit_url_root_{ENVIRONMENT}')
 
-    # Hardcoded REST method (GET, POST) calling parameters.
+    # Hardcoded REST methods (GET, POST) calling parameters.
     url_timeout: tuple = (1.0, 5.0)
 
     @computed_field
@@ -91,8 +90,6 @@ class CommonConfig(BaseSettings):
 class DockerLocal(BaseModel):
     """ Configuration parameters unique for Docker local environment.
 
-    No environment values, .env or secret files are read in this class.
-
     These values will override the values in the CommonConfig class.
     """
 
@@ -105,8 +102,6 @@ class DockerLocal(BaseModel):
 class DockerProd(BaseModel):
     """ Configuration parameters unique for Docker production environment.
 
-    No environment values, .env or secrets files are read in this class.
-
     These values will override the values in the CommonConfig class.
     """
 
@@ -118,17 +113,3 @@ class DockerProd(BaseModel):
 
     # Disable display of sensitive error dump values in the log.
     log_diagnose: bool = False
-
-
-# ---------------------------------------------------------
-
-# Translation between Docker environment and their classes.
-_setup = {'local': DockerLocal, 'prod': DockerProd}
-
-if ENVIRONMENT == 'dev':
-    config = CommonConfig()
-
-else:
-    _root_config = CommonConfig()
-    _docker_env = _setup[ENVIRONMENT]().model_dump()
-    config = _root_config.model_copy(update=_docker_env)

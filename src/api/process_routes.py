@@ -7,16 +7,16 @@ VERSION INFO::
 
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2024-03-18 22:09:25
-     $Rev: 1
+    $Date: 2024-04-08 17:11:52
+     $Rev: 7
 """
 
 # BUILTIN modules
+from uuid import UUID
 from typing import Annotated
 
 # Third party modules
 from loguru import logger
-from pydantic import UUID4
 from celery.result import AsyncResult
 from kombu.exceptions import OperationalError
 from fastapi import HTTPException, Depends, APIRouter, Body
@@ -65,7 +65,7 @@ async def process_payload(payload: Annotated[
              responses={400: {"model": BadStateError},
                         404: {"model": NotFoundError}},
              dependencies=[Depends(validate_authentication)])
-async def retry_failed_task(failed_id: UUID4) -> RetryResponseModel:
+async def retry_failed_task(failed_id: UUID) -> RetryResponseModel:
     """**Trigger a retry for a previously failed task.**"""
 
     # Extract and return Celery processing status from DB.
@@ -93,7 +93,7 @@ async def retry_failed_task(failed_id: UUID4) -> RetryResponseModel:
             response_model=StatusResponseModel,
             responses={404: {"model": NotFoundError}},
             dependencies=[Depends(validate_authentication)])
-async def check_task_status(task_id: UUID4) -> StatusResponseModel:
+async def check_task_status(task_id: UUID) -> StatusResponseModel:
     """**Return specified Celery task progress status.**"""
 
     # Extract and return Celery processing status from DB.

@@ -7,8 +7,8 @@ VERSION INFO::
 
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2024-03-19 20:02:51
-     $Rev: 4
+    $Date: 2024-04-08 17:11:52
+     $Rev: 7
 """
 
 # BUILTIN modules
@@ -21,8 +21,8 @@ import aiofiles
 from loguru import logger
 
 # local modules
+from src import config
 from ..tasks import WORKER
-from ..config.setup import config
 from ..api.models import ResourceModel, HealthResponseModel
 
 # Constants

@@ -7,15 +7,16 @@ VERSION INFO::
 
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2024-03-18 22:09:25
-     $Rev: 1
+    $Date: 2024-04-08 17:11:52
+     $Rev: 7
 """
 
 # BUILTIN modules
+from uuid import UUID
 from typing import Optional, List, Union
 
 # Third party modules
-from pydantic import ConfigDict, UUID4, BaseModel
+from pydantic import ConfigDict, BaseModel
 
 # local modules
 from .documentation import (process_example, status_example,
@@ -98,7 +99,7 @@ class ProcessResponseModel(BaseModel):
     """
     model_config = ConfigDict(json_schema_extra={"example": process_example})
 
-    id: UUID4
+    id: UUID
     status: str
 
 
@@ -128,5 +129,5 @@ class RetryResponseModel(BaseModel):
     model_config = ConfigDict(json_schema_extra={"example": retry_example})
 
     status: str
-    task_id: UUID4
-    failed_id: UUID4
+    task_id: UUID
+    failed_id: UUID

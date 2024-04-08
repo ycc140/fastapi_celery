@@ -7,8 +7,8 @@ VERSION INFO::
 
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2024-03-18 22:09:25
-     $Rev: 1
+    $Date: 2024-04-08 17:11:52
+     $Rev: 7
 """
 
 # BUILTIN modules
@@ -140,6 +140,6 @@ if __name__ == '__main__':
     # environment BEFORE we import the config module.
     os.environ['ENVIRONMENT'] = BUILD
 
-    from setup import config
+    from src import config
 
     DockerApiConfigManager(config).create_config_files()

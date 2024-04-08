@@ -7,12 +7,12 @@ VERSION INFO::
 
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2024-03-18 22:09:25
-     $Rev: 1
+    $Date: 2024-04-08 17:11:52
+     $Rev: 7
 """
 
 # Local modules
-from .setup import config
+from src import config
 
 # ---------------------------------------------------------
 

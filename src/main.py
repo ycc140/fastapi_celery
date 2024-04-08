@@ -7,8 +7,8 @@ VERSION INFO::
 
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2024-03-18 22:09:25
-     $Rev: 1
+    $Date: 2024-04-08 17:11:52
+     $Rev: 7
 """
 
 # BUILTIN modules
@@ -21,7 +21,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 # local modules
-from .config.setup import config
+from src import config
 from .api import process_routes, health_route
 from .tools.custom_logging import create_unified_logger
 from .api.documentation import (license_info, tags_metadata, description)

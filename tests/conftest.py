@@ -7,16 +7,20 @@ VERSION INFO::
 
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2024-03-19 20:45:39
-     $Rev: 5
+    $Date: 2024-04-08 17:11:52
+     $Rev: 7
 """
 
 # Third party modules
 import pytest
+from loguru import logger
 from starlette.testclient import TestClient
 
 # Local program modules
 from ..src.main import app
+
+# Remove all loggers (not needed during testing).
+logger.remove()
 
 
 # ---------------------------------------------------------

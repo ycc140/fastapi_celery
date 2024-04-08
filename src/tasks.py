@@ -7,8 +7,8 @@ VERSION INFO::
 
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2024-03-18 22:09:25
-     $Rev: 1
+    $Date: 2024-04-08 17:11:52
+     $Rev: 7
 """
 
 # BUILTIN modules
@@ -25,8 +25,8 @@ from celery.utils.log import get_task_logger
 from httpx import AsyncClient, ConnectTimeout, ConnectError
 
 # Local modules
-from .config.setup import config
-from .config import celery_config
+from src import config
+from .core import celery_config
 from .tools.rabbit_client import RabbitClient
 from .tools.custom_logging import create_unified_logger
 

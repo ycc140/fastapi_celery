@@ -6,8 +6,8 @@ Copyright: Wilde Consulting
 VERSION INFO::
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2023-07-15 16:23:58
-     $Rev: 22
+    $Date: 2024-04-08 17:11:52
+     $Rev: 7
 """
 
 # BUILTIN modules
@@ -20,7 +20,7 @@ from types import FrameType
 from loguru import logger
 
 # local modules
-from ..config.setup import config
+from src import config
 
 
 # ---------------------------------------------------------
@@ -29,7 +29,7 @@ class InterceptHandler(logging.Handler):
     """ Send logs to loguru logging from Python logging module. """
 
     def emit(self, record: logging.LogRecord):
-        """  Move the specified logging record to loguru.
+        """ Move the specified logging record to loguru.
 
         :param record: Original python log record.
         """
@@ -39,9 +39,9 @@ class InterceptHandler(logging.Handler):
         except ValueError:
             level = str(record.levelno)
 
-        frame, depth = logging.currentframe(), 2
+        frame, depth = logging.currentframe(), 0
 
-        while frame.f_code.co_filename == logging.__file__:
+        while frame and (depth == 0 or frame.f_code.co_filename == logging.__file__):
             frame = cast(FrameType, frame.f_back)
             depth += 1
 
@@ -58,7 +58,7 @@ class InterceptHandler(logging.Handler):
 def create_unified_logger() -> logger:
     """ Return unified Loguru logger object.
 
-    :return: unified Loguru logger object.
+    :return: Unified Loguru logger object.
     """
 
     level = config.log_level
@@ -68,18 +68,17 @@ def create_unified_logger() -> logger:
 
     # Create a basic Loguru logging config.
     logger.add(
-        enqueue=False,
+        enqueue=True,
         colorize=True,
         backtrace=True,
         sink=sys.stderr,
         level=level.upper(),
-        format=config.log_format,
         diagnose=config.log_diagnose,
     )
 
     # Prepare to incorporate python standard logging.
     seen = set()
-    logging.basicConfig(handlers=[InterceptHandler()], level=0)
+    logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
 
     for logger_name in logging.root.manager.loggerDict.keys():
 

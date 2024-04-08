@@ -25,43 +25,42 @@ RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requir
 # -------------------------------------
 # second stage
 #
-FROM python:alpine AS final
+FROM python:alpine
+
+# create the appropriate directories and define current timezone
+ENV APP_HOME=/home/awd TZ=Europe/Stockholm
+
+# create the app user and update system dependencies
+RUN set -eux; \
+    addgroup -g 1000 awd; \
+    adduser -u 1000 -G awd awd -D; \
+    # Upgrade the package index and install security upgrades
+    apk update; \
+    apk upgrade; \
+    rm -rf /var/lib/apk/lists/*; \
+    # Set local timezone (needs to be done before changing user).
+    ln -snf /usr/share/zoneinfo/"$TZ" /etc/localtime && echo "$TZ" > /etc/timezone
 
 # Copy created wheels from build stage
 COPY --from=build /usr/src/app/wheels /wheels
 
-# create the appropriate directories
-ENV APP_HOME=/home/app TZ=Europe/Stockholm
-
-# create the app user and update system dependencies
+# Install python dependencies
 RUN set -eux; \
-    addgroup -g 1000 app; \
-    adduser -u 1000 -G app app -D; \
-    # Upgrade the package index and install security upgrades
-    apk update; \
-    apk upgrade; \
-    # Install dependencies \
     pip install --no-cache --upgrade pip; \
     pip install --no-cache /wheels/*; \
-    rm -rf /var/lib/apk/lists/*; \
-    rm -rf /wheels/*; \
-    # Set local timezone (needs to be done before changing user).
-    ln -snf /usr/share/zoneinfo/"$TZ" /etc/localtime && echo "$TZ" > /etc/timezone
+    rm -rf /wheels
 
 # set work directory
 WORKDIR $APP_HOME
 
 # copy project and chown all the files to the app user
-COPY --chown=app:app src $APP_HOME/src
+COPY src $APP_HOME/src
 
 # copy client certificates to the app user
 COPY certs $APP_HOME/certs
-
-# Use argument parameter to create required config files.
-ARG BUILD_ENV
 
 # Update gunicorn and uvicorn log level based on log file configurationand build env.
 RUN ["python", "src/config/create_external_config.py"]
 
 # change to the app user
-USER app
+USER awd
