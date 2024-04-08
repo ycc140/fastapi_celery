@@ -59,6 +59,9 @@ COPY src $APP_HOME/src
 # copy client certificates to the app user
 COPY certs $APP_HOME/certs
 
+# Use argument parameter to create required config files.
+ARG BUILD_ENV
+
 # Update gunicorn and uvicorn log level based on log file configurationand build env.
 RUN ["python", "src/core/create_external_config.py"]
 
