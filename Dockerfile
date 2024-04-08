@@ -60,7 +60,7 @@ COPY src $APP_HOME/src
 COPY certs $APP_HOME/certs
 
 # Update gunicorn and uvicorn log level based on log file configurationand build env.
-RUN ["python", "src/config/create_external_config.py"]
+RUN ["python", "src/core/create_external_config.py"]
 
 # change to the app user
 USER awd
