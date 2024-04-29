@@ -7,8 +7,8 @@ VERSION INFO::
 
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2024-04-08 17:11:52
-     $Rev: 7
+    $Date: 2024-04-29 17:18:03
+     $Rev: 10
 """
 
 # Local modules
@@ -59,20 +59,15 @@ retry_example = {
     "failed_id": "94624ffb-d5e8-4fbb-a760-dbdef0abb46f"
 }
 
-process_request_body_example = {
-    "queue": {
-        "summary": "responseQueue",
-        "value": {"msg": "test-01 today",
-                  "responseQueue": "CallerService"}},
-    "url": {
-        "summary": "responseUrl",
-        "value": {"msg": "test-02 today",
-                  "responseUrl": "http://localhost:8001/v1/response"}},
-    "docker": {
-        "summary": "local Docker responseUrl",
-        "value": {"msg": "test-03 today",
-                  "responseUrl": "http://host.docker.internal:8001/v1/response"}}
+post_query_documentation = {
+    "callback_url": {'default': None,
+                     'description': 'Specify callback URL.<br>'
+                                    '*Example: `http://localhost:8001/v1/response`*.'},
+    "callback_queue": {'default': None,
+                       'description': 'Specify name of callback service.<br>'
+                                      '*Example: `CallerService`*'},
 }
+""" OpenAPI Process POST query parameters documentation. """
 
 tags_metadata = [
     {

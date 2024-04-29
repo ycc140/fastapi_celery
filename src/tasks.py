@@ -7,8 +7,8 @@ VERSION INFO::
 
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2024-04-08 17:11:52
-     $Rev: 7
+    $Date: 2024-04-29 17:18:03
+     $Rev: 10
 """
 
 # BUILTIN modules
@@ -96,11 +96,11 @@ def response_handler(task: callable, status: str, retval: Any,
     Return the processing response, good or bad when the task is finished
     when the caller has requested it.
 
-    When the 'responseUrl' parameter is one of the input arguments, the
+    When the 'callbackUrl' parameter is one of the Query arguments, the
     processing result is returned to the caller by using a RESTful
     POST call to the specified callback URL.
 
-    When the 'responseQueue' parameter is one of the input arguments,
+    When the 'callbackQueue' parameter is one of the Query arguments,
     the processing result is returned to the caller by publishing it
     on the specified RabbitMQ queue.
 
@@ -112,10 +112,10 @@ def response_handler(task: callable, status: str, retval: Any,
     :param _: Not used (needed for correct signature).
     :param __: Not used (needed for correct signature).
     """
-    payload = args[0]
+    params: dict = args[1]
 
     # Check if any more work needs to be done here.
-    if not payload.get('responseUrl', payload.get('responseQueue')):
+    if all(info is None for info in params.values()):
         return
 
     if status == 'SUCCESS':
@@ -127,11 +127,11 @@ def response_handler(task: callable, status: str, retval: Any,
 
     response = {'job_id': task_id, 'status': status, 'result': result}
 
-    if 'responseUrl' in payload:
-        asyncio.run(send_restful_response(payload['responseUrl'], response))
+    if params['callbackUrl']:
+        asyncio.run(send_restful_response(params['callbackUrl'], response))
 
-    if 'responseQueue' in payload:
-        asyncio.run(send_rabbit_response(payload['responseQueue'], response))
+    elif params['callbackQueue']:
+        asyncio.run(send_rabbit_response(params['callbackQueue'], response))
 
 
 # ---------------------------------------------------------
@@ -142,7 +142,7 @@ def response_handler(task: callable, status: str, retval: Any,
     autoretry_for=(BaseException,),
     bind=True, default_retry_delay=10, max_retries=2
 )
-def processor(task: callable, payload: dict) -> dict:
+def processor(task: callable, payload: dict, params: dict) -> dict:
     """ Let's simulate a long-running task here.
 
     Using the random module to generate errors now and
@@ -150,6 +150,7 @@ def processor(task: callable, payload: dict) -> dict:
 
     :param task: Current task.
     :param payload: Process the received payload.
+    :param params: Optional query arguments (used in response_handler).
     :return: Processing response.
     """
 

@@ -7,8 +7,8 @@ VERSION INFO::
 
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2024-04-08 17:11:52
-     $Rev: 7
+    $Date: 2024-04-29 17:18:03
+     $Rev: 10
 """
 
 # BUILTIN modules
@@ -39,6 +39,11 @@ class NotFoundError(BaseModel):
     :ivar detail: Error detail text.
     """
     detail: str = "Task ID not found"
+
+
+class ArgumentError(BaseModel):
+    """ Define model for the http 406 exception (NOT_ACCEPTABLE). """
+    detail: str = "Only one query argument can be provided in query URL"
 
 
 class HealthStatusError(BaseModel):
