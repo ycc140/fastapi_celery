@@ -7,14 +7,14 @@ VERSION INFO::
 
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2024-04-08 17:11:52
-     $Rev: 7
+    $Date: 2024-05-01 15:39:55
+     $Rev: 11
 """
 
 # Third party modules
 import pytest
 from loguru import logger
-from starlette.testclient import TestClient
+from httpx import AsyncClient
 
 # Local program modules
 from ..src.main import app
@@ -35,8 +35,8 @@ def anyio_backend():
 # ---------------------------------------------------------
 #
 @pytest.fixture(scope="module")
-def test_app():
+async def test_app():
     """ Module fixture. """
 
-    with TestClient(app=app) as test_client:
-        yield test_client
+    async with AsyncClient(app=app, base_url="http://test") as client:
+        yield client

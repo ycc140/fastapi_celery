@@ -8,8 +8,8 @@ VERSION INFO::
 
     $Repo: fastapi_celery
   $Author: Anders Wiklund
-    $Date: 2024-03-18 22:09:25
-     $Rev: 1
+    $Date: 2024-05-01 15:39:55
+     $Rev: 11
 """
 
 # BUILTIN modules
@@ -17,7 +17,7 @@ import asyncio
 import contextlib
 
 # Local modules
-from src.config.setup import config
+from src import config
 from src.tools.rabbit_client import RabbitClient
 
 # Constants
